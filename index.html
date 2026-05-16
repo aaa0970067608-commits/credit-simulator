@@ -138,15 +138,17 @@ animation: slideIn 0.3s ease;
 
 @media (max-width: 640px) {
 .credit-card-row {
-grid-template-columns: 1fr 1fr 1fr;
-grid-template-rows: auto auto;
+grid-template-columns: 1fr 1fr;
 gap: 10px;
 }
 .credit-card-row .input-group:first-child {
-grid-column: 1 / -1;
+grid-column: 1 / 2;
 }
-.input-group input {
-padding: 10px 12px;
+.credit-card-row .remove-btn {
+grid-column: 2;
+grid-row: 1;
+justify-self: end;
+margin-top: 18px;
 }
 }
 

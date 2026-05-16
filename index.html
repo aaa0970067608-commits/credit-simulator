@@ -66,7 +66,7 @@ margin-bottom: 48px;
 display: inline-block;
 background: rgba(124,111,255,0.15);
 border: 1px solid rgba(124,111,255,0.3);
-color: var(–accent);
+color: #7c6fff;
 font-size: 11px;
 font-weight: 600;
 letter-spacing: 2px;
@@ -89,15 +89,15 @@ background-clip: text;
 }
 
 .subtitle {
-color: var(–muted);
+color: #6b6b85;
 font-size: 15px;
 font-weight: 300;
 }
 
 /* Cards */
 .card {
-background: var(–card);
-border: 1px solid var(–border);
+background: #1a1a24;
+border: 1px solid #2a2a38;
 border-radius: 20px;
 padding: 28px;
 margin-bottom: 20px;
@@ -112,7 +112,7 @@ font-size: 13px;
 font-weight: 700;
 letter-spacing: 1.5px;
 text-transform: uppercase;
-color: var(–muted);
+color: #6b6b85;
 margin-bottom: 20px;
 display: flex;
 align-items: center;
@@ -129,8 +129,8 @@ display: grid;
 grid-template-columns: 160px 1fr 1fr auto;
 gap: 12px;
 align-items: end;
-background: var(–surface);
-border: 1px solid var(–border);
+background: #13131a;
+border: 1px solid #2a2a38;
 border-radius: 12px;
 padding: 16px 18px;
 animation: slideIn 0.3s ease;
@@ -138,17 +138,13 @@ animation: slideIn 0.3s ease;
 
 @media (max-width: 640px) {
 .credit-card-row {
-grid-template-columns: 1fr 1fr;
-gap: 10px;
+grid-template-columns: 1fr;
+gap: 8px;
 }
-.credit-card-row .input-group:first-child {
-grid-column: 1 / 2;
-}
-.credit-card-row .remove-btn {
-grid-column: 2;
-grid-row: 1;
-justify-self: end;
-margin-top: 18px;
+.remove-btn {
+width: 100%;
+margin-top: 0;
+border-radius: 8px;
 }
 }
 
@@ -160,31 +156,31 @@ to { opacity: 1; transform: translateY(0); }
 .input-group label {
 display: block;
 font-size: 11px;
-color: var(–muted);
+color: #6b6b85;
 margin-bottom: 4px;
 letter-spacing: 0.5px;
 }
 
 .input-group input {
 width: 100%;
-background: var(–card);
-border: 1px solid var(–border);
+background: #1a1a24;
+border: 1px solid #2a2a38;
 border-radius: 8px;
 padding: 8px 12px;
-color: var(–text);
+color: #e8e8f0;
 font-size: 14px;
 font-family: ‘DM Sans’, sans-serif;
 outline: none;
 transition: border-color 0.2s;
 }
 
-.input-group input:focus { border-color: var(–accent); }
-.input-group input::placeholder { color: var(–muted); }
+.input-group input:focus { border-color: #7c6fff; }
+.input-group input::placeholder { color: #6b6b85; }
 
 .remove-btn {
 background: rgba(255,71,87,0.1);
 border: 1px solid rgba(255,71,87,0.2);
-color: var(–red);
+color: #ff4757;
 border-radius: 8px;
 width: 32px;
 height: 32px;
@@ -202,7 +198,7 @@ margin-top: 16px;
 .add-btn {
 background: rgba(124,111,255,0.1);
 border: 1px dashed rgba(124,111,255,0.3);
-color: var(–accent);
+color: #7c6fff;
 border-radius: 12px;
 padding: 12px;
 width: 100%;
@@ -245,12 +241,12 @@ text-anchor: middle;
 .gauge-sub {
 font-size: 11px;
 text-anchor: middle;
-fill: var(–muted);
+fill: #6b6b85;
 }
 
 .gauge-title {
 font-size: 12px;
-color: var(–muted);
+color: #6b6b85;
 margin-top: 8px;
 letter-spacing: 1px;
 text-transform: uppercase;
@@ -275,33 +271,34 @@ letter-spacing: 3px;
 transition: color 0.5s;
 }
 
-.score-max { font-size: 18px; color: var(–muted); margin-bottom: 8px; }
+.score-max { font-size: 18px; color: #6b6b85; margin-bottom: 8px; }
 
 .score-bar-wrap {
 position: relative;
 height: 10px;
-background: var(–surface);
+background: #13131a;
 border-radius: 10px;
-overflow: hidden;
-margin-bottom: 8px;
+overflow: visible;
+margin-bottom: 16px;
+margin-top: 8px;
 }
 
 .score-bar-track {
 height: 100%;
 border-radius: 10px;
-background: linear-gradient(90deg, var(–red) 0%, var(–yellow) 40%, var(–green) 80%);
+background: linear-gradient(90deg, #ff4757 0%, #ffd166 40%, #00d4a0 80%);
 width: 100%;
-opacity: 0.3;
+opacity: 0.5;
 }
 
 .score-bar-indicator {
 position: absolute;
-top: -3px;
-width: 16px;
-height: 16px;
+top: -4px;
+width: 18px;
+height: 18px;
 border-radius: 50%;
 background: white;
-box-shadow: 0 0 10px rgba(255,255,255,0.5);
+box-shadow: 0 0 12px rgba(255,255,255,0.8);
 transform: translateX(-50%);
 transition: left 0.6s cubic-bezier(0.34,1.56,0.64,1);
 }
@@ -343,18 +340,18 @@ margin-bottom: 4px;
 @media (max-width: 600px) { .importance-grid { grid-template-columns: 1fr; } }
 
 .importance-item {
-background: var(–surface);
+background: #13131a;
 border-radius: 12px;
 padding: 14px;
 text-align: center;
-border: 1px solid var(–border);
+border: 1px solid #2a2a38;
 }
 
 .importance-icon { font-size: 22px; margin-bottom: 6px; }
 
 .importance-label {
 font-size: 11px;
-color: var(–muted);
+color: #6b6b85;
 line-height: 1.4;
 }
 
@@ -376,12 +373,12 @@ margin-bottom: 10px;
 font-size: 13px;
 }
 
-.breakdown-name { flex: 1; color: var(–muted); font-size: 12px; }
+.breakdown-name { flex: 1; color: #6b6b85; font-size: 12px; }
 
 .breakdown-bar-wrap {
 flex: 2;
 height: 6px;
-background: var(–surface);
+background: #13131a;
 border-radius: 6px;
 overflow: hidden;
 }
@@ -409,8 +406,8 @@ gap: 14px;
 @media (max-width: 600px) { .strategy-grid { grid-template-columns: 1fr; } }
 
 .strategy-card {
-background: var(–surface);
-border: 1px solid var(–border);
+background: #13131a;
+border: 1px solid #2a2a38;
 border-radius: 14px;
 padding: 18px;
 cursor: pointer;
@@ -425,7 +422,7 @@ position: absolute;
 top: 0; left: 0;
 width: 3px;
 height: 100%;
-background: var(–accent);
+background: #7c6fff;
 opacity: 0;
 transition: opacity 0.25s;
 }
@@ -444,7 +441,7 @@ align-items: center;
 gap: 6px;
 }
 
-.strategy-desc { font-size: 12px; color: var(–muted); line-height: 1.5; }
+.strategy-desc { font-size: 12px; color: #6b6b85; line-height: 1.5; }
 
 /* Tips */
 .tips-list { display: flex; flex-direction: column; gap: 10px; }
@@ -453,7 +450,7 @@ gap: 6px;
 display: flex;
 gap: 12px;
 align-items: flex-start;
-background: var(–surface);
+background: #13131a;
 border-radius: 12px;
 padding: 14px 16px;
 font-size: 13px;
@@ -468,12 +465,12 @@ from { opacity: 0; transform: translateX(-6px); }
 to { opacity: 1; transform: translateX(0); }
 }
 
-.tip.good { border-left-color: var(–green); }
-.tip.warn { border-left-color: var(–yellow); }
-.tip.bad { border-left-color: var(–red); }
+.tip.good { border-left-color: #00d4a0; }
+.tip.warn { border-left-color: #ffd166; }
+.tip.bad { border-left-color: #ff4757; }
 
 .tip-icon { font-size: 18px; flex-shrink: 0; }
-.tip-text { color: var(–text); }
+.tip-text { color: #e8e8f0; }
 
 /* Status tag */
 .status-tag {
@@ -488,14 +485,14 @@ margin-bottom: 16px;
 transition: all 0.3s;
 }
 
-.status-tag.good { background: rgba(0,212,160,0.1); color: var(–green); border: 1px solid rgba(0,212,160,0.2); }
-.status-tag.warn { background: rgba(255,209,102,0.1); color: var(–yellow); border: 1px solid rgba(255,209,102,0.2); }
-.status-tag.bad { background: rgba(255,71,87,0.1); color: var(–red); border: 1px solid rgba(255,71,87,0.2); }
+.status-tag.good { background: rgba(0,212,160,0.1); color: #00d4a0; border: 1px solid rgba(0,212,160,0.2); }
+.status-tag.warn { background: rgba(255,209,102,0.1); color: #ffd166; border: 1px solid rgba(255,209,102,0.2); }
+.status-tag.bad { background: rgba(255,71,87,0.1); color: #ff4757; border: 1px solid rgba(255,71,87,0.2); }
 
 /* Divider */
 .divider {
 height: 1px;
-background: var(–border);
+background: #2a2a38;
 margin: 20px 0;
 }
 
@@ -506,21 +503,21 @@ margin: 20px 0;
 display: flex;
 justify-content: space-between;
 font-size: 12px;
-color: var(–muted);
+color: #6b6b85;
 margin-bottom: 8px;
 }
 
-.sim-val { color: var(–accent); font-weight: 600; }
+.sim-val { color: #7c6fff; font-weight: 600; }
 
 input[type=range] {
 width: 100%;
-accent-color: var(–accent);
+accent-color: #7c6fff;
 cursor: pointer;
 }
 
 .sim-result {
 margin-top: 14px;
-background: var(–surface);
+background: #13131a;
 border-radius: 12px;
 padding: 14px 16px;
 font-size: 13px;
@@ -531,8 +528,8 @@ gap: 10px;
 
 .sim-arrow { font-size: 20px; }
 .sim-text { line-height: 1.5; }
-.sim-highlight { color: var(–green); font-weight: 600; }
-.sim-highlight.neg { color: var(–red); }
+.sim-highlight { color: #00d4a0; font-weight: 600; }
+.sim-highlight.neg { color: #ff4757; }
 
 </style>
 </head>
@@ -560,82 +557,82 @@ gap: 10px;
 
 ```
 <!-- FICO 評分組成 -->
-<div style="background:var(--surface); border-radius:12px; padding:14px 16px; margin-bottom:14px;">
-  <div style="font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:12px;">🇺🇸 美國 FICO 評分組成（300–850）</div>
+<div style="background:#13131a; border-radius:12px; padding:14px 16px; margin-bottom:14px;">
+  <div style="font-size:11px; color:#6b6b85; letter-spacing:1px; text-transform:uppercase; margin-bottom:12px;">🇺🇸 美國 FICO 評分組成（300–850）</div>
   <div style="display:flex; flex-direction:column; gap:8px;">
     <div style="display:flex; align-items:center; gap:10px;">
-      <div style="font-size:12px; color:var(--muted); width:80px;">還款紀錄</div>
-      <div style="flex:1; height:6px; background:var(--border); border-radius:6px; overflow:hidden;">
+      <div style="font-size:12px; color:#6b6b85; width:80px;">還款紀錄</div>
+      <div style="flex:1; height:6px; background:#2a2a38; border-radius:6px; overflow:hidden;">
         <div style="width:35%; height:100%; background:#7c6fff; border-radius:6px;"></div>
       </div>
       <div style="font-size:12px; font-family:'Bebas Neue'; letter-spacing:1px; color:#7c6fff; width:30px; text-align:right;">35%</div>
     </div>
     <div style="display:flex; align-items:center; gap:10px;">
-      <div style="font-size:12px; color:var(--text); width:80px; font-weight:600;">額度使用率</div>
-      <div style="flex:1; height:6px; background:var(--border); border-radius:6px; overflow:hidden;">
+      <div style="font-size:12px; color:#e8e8f0; width:80px; font-weight:600;">額度使用率</div>
+      <div style="flex:1; height:6px; background:#2a2a38; border-radius:6px; overflow:hidden;">
         <div style="width:30%; height:100%; background:#00d4a0; border-radius:6px;"></div>
       </div>
       <div style="font-size:12px; font-family:'Bebas Neue'; letter-spacing:1px; color:#00d4a0; width:30px; text-align:right;">30%</div>
     </div>
     <div style="display:flex; align-items:center; gap:10px; opacity:0.5;">
-      <div style="font-size:12px; color:var(--muted); width:80px;">信用年齡</div>
-      <div style="flex:1; height:6px; background:var(--border); border-radius:6px; overflow:hidden;">
-        <div style="width:15%; height:100%; background:var(--muted); border-radius:6px;"></div>
+      <div style="font-size:12px; color:#6b6b85; width:80px;">信用年齡</div>
+      <div style="flex:1; height:6px; background:#2a2a38; border-radius:6px; overflow:hidden;">
+        <div style="width:15%; height:100%; background:#6b6b85; border-radius:6px;"></div>
       </div>
-      <div style="font-size:12px; font-family:'Bebas Neue'; letter-spacing:1px; color:var(--muted); width:30px; text-align:right;">15%</div>
+      <div style="font-size:12px; font-family:'Bebas Neue'; letter-spacing:1px; color:#6b6b85; width:30px; text-align:right;">15%</div>
     </div>
     <div style="display:flex; align-items:center; gap:10px; opacity:0.5;">
-      <div style="font-size:12px; color:var(--muted); width:80px;">信用種類</div>
-      <div style="flex:1; height:6px; background:var(--border); border-radius:6px; overflow:hidden;">
-        <div style="width:10%; height:100%; background:var(--muted); border-radius:6px;"></div>
+      <div style="font-size:12px; color:#6b6b85; width:80px;">信用種類</div>
+      <div style="flex:1; height:6px; background:#2a2a38; border-radius:6px; overflow:hidden;">
+        <div style="width:10%; height:100%; background:#6b6b85; border-radius:6px;"></div>
       </div>
-      <div style="font-size:12px; font-family:'Bebas Neue'; letter-spacing:1px; color:var(--muted); width:30px; text-align:right;">10%</div>
+      <div style="font-size:12px; font-family:'Bebas Neue'; letter-spacing:1px; color:#6b6b85; width:30px; text-align:right;">10%</div>
     </div>
     <div style="display:flex; align-items:center; gap:10px; opacity:0.5;">
-      <div style="font-size:12px; color:var(--muted); width:80px;">新申請次數</div>
-      <div style="flex:1; height:6px; background:var(--border); border-radius:6px; overflow:hidden;">
-        <div style="width:10%; height:100%; background:var(--muted); border-radius:6px;"></div>
+      <div style="font-size:12px; color:#6b6b85; width:80px;">新申請次數</div>
+      <div style="flex:1; height:6px; background:#2a2a38; border-radius:6px; overflow:hidden;">
+        <div style="width:10%; height:100%; background:#6b6b85; border-radius:6px;"></div>
       </div>
-      <div style="font-size:12px; font-family:'Bebas Neue'; letter-spacing:1px; color:var(--muted); width:30px; text-align:right;">10%</div>
+      <div style="font-size:12px; font-family:'Bebas Neue'; letter-spacing:1px; color:#6b6b85; width:30px; text-align:right;">10%</div>
     </div>
   </div>
-  <div style="margin-top:10px; font-size:11px; color:var(--muted); padding-top:10px; border-top:1px solid var(--border);">
+  <div style="margin-top:10px; font-size:11px; color:#6b6b85; padding-top:10px; border-top:1px solid #2a2a38;">
     ← 本工具模擬的是 <strong style="color:#00d4a0">額度使用率</strong> 對評分的影響
   </div>
   <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;">
-    <a href="https://www.myfico.com/credit-education/whats-in-your-credit-score" target="_blank" style="font-size:11px; color:var(--accent); text-decoration:none; background:rgba(124,111,255,0.1); border:1px solid rgba(124,111,255,0.25); padding:4px 10px; border-radius:20px;">🔗 myFICO 官方說明</a>
-    <a href="https://www.consumerfinance.gov/ask-cfpb/what-is-a-credit-score-en-315/" target="_blank" style="font-size:11px; color:var(--accent); text-decoration:none; background:rgba(124,111,255,0.1); border:1px solid rgba(124,111,255,0.25); padding:4px 10px; border-radius:20px;">🏛️ CFPB 消費者金融保護局</a>
-    <a href="https://www.experian.com/blogs/ask-experian/credit-education/score-basics/what-is-a-good-credit-score/" target="_blank" style="font-size:11px; color:var(--accent); text-decoration:none; background:rgba(124,111,255,0.1); border:1px solid rgba(124,111,255,0.25); padding:4px 10px; border-radius:20px;">📊 Experian 評分指南</a>
+    <a href="https://www.myfico.com/credit-education/whats-in-your-credit-score" target="_blank" style="font-size:11px; color:#7c6fff; text-decoration:none; background:rgba(124,111,255,0.1); border:1px solid rgba(124,111,255,0.25); padding:4px 10px; border-radius:20px;">🔗 myFICO 官方說明</a>
+    <a href="https://www.consumerfinance.gov/ask-cfpb/what-is-a-credit-score-en-315/" target="_blank" style="font-size:11px; color:#7c6fff; text-decoration:none; background:rgba(124,111,255,0.1); border:1px solid rgba(124,111,255,0.25); padding:4px 10px; border-radius:20px;">🏛️ CFPB 消費者金融保護局</a>
+    <a href="https://www.experian.com/blogs/ask-experian/credit-education/score-basics/what-is-a-good-credit-score/" target="_blank" style="font-size:11px; color:#7c6fff; text-decoration:none; background:rgba(124,111,255,0.1); border:1px solid rgba(124,111,255,0.25); padding:4px 10px; border-radius:20px;">📊 Experian 評分指南</a>
   </div>
 </div>
 <div class="importance-grid">
   <div class="importance-item">
     <div class="importance-icon">🏦</div>
-    <div class="importance-val" style="color:var(--accent)">30%</div>
+    <div class="importance-val" style="color:#7c6fff">30%</div>
     <div class="importance-label">佔 FICO 信用評分<br>第二大權重因素</div>
   </div>
   <div class="importance-item">
     <div class="importance-icon">⚡</div>
-    <div class="importance-val" style="color:var(--green)">30天</div>
+    <div class="importance-val" style="color:#00d4a0">30天</div>
     <div class="importance-label">還款後最快一個<br>帳單週期即可反映</div>
   </div>
   <div class="importance-item">
     <div class="importance-icon">🎯</div>
-    <div class="importance-val" style="color:var(--yellow)">30%</div>
+    <div class="importance-val" style="color:#ffd166">30%</div>
     <div class="importance-label">建議使用率上限<br>10% 以下最理想</div>
   </div>
 </div>
 <div style="margin-top:14px; display:flex; flex-direction:column; gap:8px;">
-  <div style="font-size:13px; color:var(--muted); line-height:1.6; background:var(--surface); border-radius:10px; padding:12px 14px; border-left:3px solid var(--accent)">
-    💳 <strong style="color:var(--text)">什麼是信用額度使用率？</strong><br>
+  <div style="font-size:13px; color:#6b6b85; line-height:1.6; background:#13131a; border-radius:10px; padding:12px 14px; border-left:3px solid #7c6fff">
+    💳 <strong style="color:#e8e8f0">什麼是信用額度使用率？</strong><br>
     就是你「用了多少信用額度」的百分比。例如你的信用卡總額度 10 萬，刷了 3 萬，使用率就是 30%。銀行會透過這個數字判斷你的還款壓力與財務健康狀況。
   </div>
-  <div style="font-size:13px; color:var(--muted); line-height:1.6; background:var(--surface); border-radius:10px; padding:12px 14px; border-left:3px solid var(--green)">
-    ✅ <strong style="color:var(--text)">每張卡都算，不只是整體！</strong><br>
+  <div style="font-size:13px; color:#6b6b85; line-height:1.6; background:#13131a; border-radius:10px; padding:12px 14px; border-left:3px solid #00d4a0">
+    ✅ <strong style="color:#e8e8f0">每張卡都算，不只是整體！</strong><br>
     信用評分系統會分別計算每張卡的使用率，再加總計算整體。就算整體使用率低，單張卡超過 50% 仍會拉低評分。
   </div>
-  <div style="font-size:13px; color:var(--muted); line-height:1.6; background:var(--surface); border-radius:10px; padding:12px 14px; border-left:3px solid var(--red)">
-    ⚠️ <strong style="color:var(--text)">使用率越高，借款成本越貴！</strong><br>
+  <div style="font-size:13px; color:#6b6b85; line-height:1.6; background:#13131a; border-radius:10px; padding:12px 14px; border-left:3px solid #ff4757">
+    ⚠️ <strong style="color:#e8e8f0">使用率越高，借款成本越貴！</strong><br>
     使用率過高代表還款壓力大，銀行可能提高貸款利率、降低核准額度，甚至影響你的房貸申請資格。
   </div>
 </div>
@@ -693,7 +690,7 @@ gap: 10px;
       <span class="zone-pill" style="color:#00d4a0">優秀<small>740</small></span>
       <span class="zone-pill" style="color:#00ffcc">頂尖<small>850</small></span>
     </div>
-    <div id="scoreFormula" style="margin-top:12px; font-size:10px; color:var(--muted); line-height:1.6; padding:8px 10px; background:rgba(255,255,255,0.03); border-radius:8px; display:none"></div>
+    <div id="scoreFormula" style="margin-top:12px; font-size:10px; color:#6b6b85; line-height:1.6; padding:8px 10px; background:rgba(255,255,255,0.03); border-radius:8px; display:none"></div>
   </div>
 </div>
 ```
@@ -711,7 +708,7 @@ gap: 10px;
 
   <div class="card" id="simCard" style="display:none">
     <div class="card-title"><span>🔮</span> 還款情境模擬</div>
-    <p style="font-size:13px; color:var(--muted); margin-bottom:4px">如果我多還一筆錢，使用率會變多少？</p>
+    <p style="font-size:13px; color:#6b6b85; margin-bottom:4px">如果我多還一筆錢，使用率會變多少？</p>
     <div class="sim-wrap">
       <div class="sim-label">
         <span>額外還款金額</span>
@@ -747,7 +744,7 @@ gap: 10px;
         <div class="strategy-desc">每月<strong>全額繳清</strong>，零利息，信用評分最佳，最推薦的長期策略。</div>
       </div>
     </div>
-    <div id="strategyAdvice" style="margin-top:16px; font-size:13px; color:var(--muted); background:var(--surface); border-radius:12px; padding:14px 16px; line-height:1.6;"></div>
+    <div id="strategyAdvice" style="margin-top:16px; font-size:13px; color:#6b6b85; background:#13131a; border-radius:12px; padding:14px 16px; line-height:1.6;"></div>
   </div>
 
   <!-- 個人化建議 -->
@@ -924,7 +921,7 @@ gap: 10px;
     if (totalLimit > 0) {
       formulaEl.style.display = 'block';
       formulaEl.innerHTML = `
-        📐 <strong style="color:var(--text)">推算方式（參考 FICO 使用率邏輯）</strong><br>
+        📐 <strong style="color:#e8e8f0">推算方式（參考 FICO 使用率邏輯）</strong><br>
         整體使用率 ${util.toFixed(1)}% → 基礎分 ${base}
         ${perCardPenalty > 0 ? `<br>逐卡高使用懲罰 −${perCardPenalty} 分（${maxedCount > 0 ? maxedCount + ' 張卡額度用滿' : '部分卡片超過 50%'}）` : ''}
         <br>= 估計分數 <strong style="color:${color}">${score}</strong>

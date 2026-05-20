@@ -856,14 +856,40 @@ function updateSim() {
     return;
   }
 
-  // pay = 0 也要顯示未繳款後果
+  // pay = 0 也要顯示未繳款後果，並連動評分
   if (pay <= 0) {
     document.getElementById('methodGrid').innerHTML = '';
     const res = document.getElementById('simResult');
     res.style.display = 'block';
     res.innerHTML = `<span style="color:#ff4757">❌ 未繳款 → 30天後通報信用局，扣 75–100 分（myFICO）<br><span style="font-size:11px;opacity:0.7">最低還款約 NT$${minPay.toLocaleString()}，建議至少繳最低還款避免逾期紀錄</span></span>`;
+
+    // 連動評分卡顯示預估扣分後分數
+    const { total } = calcScore();
+    const penalty = 88; // 取中間值
+    const newScore = Math.max(300, total - penalty);
+    const el = document.getElementById('scoreNum');
+    el.textContent = newScore;
+    el.style.color = '#ff4757';
+    const tag = document.getElementById('statusTag');
+    tag.style.display = 'inline-flex';
+    tag.className = 'status-tag bad';
+    tag.textContent = '🚨 未繳款預估';
+    const pct = ((newScore - 300) / 550) * 100;
+    document.getElementById('scoreIndicator').style.left = pct + '%';
+    document.getElementById('formulaBox').style.display = 'block';
+    document.getElementById('formulaBox').innerHTML = `
+      ⚠️ <strong style="color:#ff4757">本月未繳款預估影響</strong><br>
+      目前模擬分 ${total} → 扣除遲繳罰分 −${penalty}<br>
+      = 預估評分 <strong style="color:#ff4757;font-size:13px;">${newScore}</strong> 分<br>
+      <span style="opacity:0.5;font-size:10px;">※ 30天後通報信用局才正式影響，實際扣分因人而異（myFICO：75–100分）</span>
+    `;
+    updateTips(newScore);
     return;
   }
+
+  // 有還款時恢復正常評分顯示
+  updateScore();
+  updateTips();
 
   const isMultiCard = cards.length > 1;
   const grid = document.getElementById('methodGrid');
@@ -998,8 +1024,9 @@ function updateSim() {
 }
 
 // ==================== 建議 ====================
-function updateTips() {
-  const { total, util } = calcScore();
+function updateTips(overrideScore) {
+  const { total: baseTotal, util } = calcScore();
+  const total = overrideScore !== undefined ? overrideScore : baseTotal;
   const tips = [];
 
   if (latePayments > 0) {
@@ -1027,12 +1054,16 @@ function updateTips() {
   }
 
   if (total >= 740) {
-    tips.push({ type:'good', icon:'🎉', text:`評分 ${total} 分，屬於優秀等級！申請一般貸款應可獲得較優利率。` });
+    tips.push({ type:'good', icon:'🎉', text:`評分 ${total} 分，屬於優秀等級！可申請大多數貸款並獲得最優利率，房貸、車貸核准率高。` });
   } else if (total >= 670) {
     const vs714 = total >= 714 ? `高於美國平均714分` : `低於美國平均714分，差距 ${714 - total} 分`;
-    tips.push({ type:'good', icon:'👍', text:`評分 ${total} 分，屬於良好等級（${vs714}）。大多數貸款申請應可通過。` });
+    tips.push({ type:'good', icon:'👍', text:`評分 ${total} 分，屬於良好等級（${vs714}）。大多數貸款申請應可通過，但未必能拿到最優利率。` });
+  } else if (total >= 580) {
+    tips.push({ type:'warn', icon:'⚠️', text:`評分 ${total} 分，屬於尚可等級，低於美國平均714分，差距 ${714 - total} 分。貸款可能通過但利率較高，建議先降低使用率或清除逾期紀錄再申請。` });
+  } else if (total >= 450) {
+    tips.push({ type:'bad', icon:'📉', text:`評分 ${total} 分，需要改善。申請貸款被拒或面臨高利率的風險很高。建議先解決逾期紀錄、降低使用率，至少3–6個月後再申請。` });
   } else {
-    tips.push({ type:'warn', icon:'📈', text:`評分 ${total} 分，低於美國平均714分，差距 ${714 - total} 分。建議先改善信用狀況再申請貸款，否則可能面臨較高利率或被拒。` });
+    tips.push({ type:'bad', icon:'🚨', text:`評分 ${total} 分，屬於高度風險等級。建議暫緩申請任何貸款，優先修復信用：清償逾期款項、降低使用率，需要至少12個月以上的持續改善。` });
   }
 
   const list = document.getElementById('tipsList');

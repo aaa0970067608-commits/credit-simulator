@@ -533,7 +533,7 @@
 
 <script>
 // ==================== 狀態 ====================
-let cards = [{ name: '卡片 1', limit: 100000, balance: 30000, rate: 1.25 }];
+let cards = [{ name: '卡片 1', limit: 100000, balance: 30000, rate: 15 }];
 let latePayments = 0;    // 0,1,2,3 → 0次/1次/2-3次/4+次
 let creditAge = 5;       // -1=不確定
 let creditAgeIdx = 5;
@@ -579,9 +579,9 @@ function renderCards() {
           <input type="number" value="${c.balance}" placeholder="30000" style="border-color:rgba(255,107,157,0.3)" oninput="cards[${i}].balance=+this.value||0;updateAll()">
         </div>
         <div class="input-group">
-          <label>月循環利率（%）</label>
-          <input type="number" value="${c.rate || 1.25}" placeholder="1.25" min="0.1" max="1.25" step="0.05" style="border-color:rgba(255,209,102,0.3)" oninput="let v=Math.min(+this.value||1.25,1.25);cards[${i}].rate=v;this.nextElementSibling.querySelector('span').textContent=(v*12).toFixed(1)+'%';updateAll()">
-          <div style="font-size:10px;color:#6b6b85;margin-top:4px;">年利率 ≈ <span style="color:#ffd166;font-weight:600;">${((c.rate||1.25)*12).toFixed(1)}%</span>　法定上限月1.25%</div>
+          <label>年循環利率（%）</label>
+          <input type="number" value="${c.rate || 15}" placeholder="15" min="5" max="15" step="0.5" style="border-color:rgba(255,209,102,0.3)" oninput="let v=Math.min(Math.max(+this.value||15,0.1),15);cards[${i}].rate=v;this.nextElementSibling.querySelector('span').textContent=(v/12).toFixed(2)+'%';updateAll()">
+          <div style="font-size:10px;color:#6b6b85;margin-top:4px;">月利率 ≈ <span style="color:#ffd166;font-weight:600;">${((c.rate||15)/12).toFixed(2)}%</span>　範圍 5%–15%（法定上限）</div>
         </div>
       </div>
       ${cards.length > 1 ? `<button class="remove-btn" onclick="removeCard(${i})">✕ 移除此卡</button>` : ''}
@@ -592,7 +592,7 @@ function renderCards() {
 
 function addCard() {
   if (cards.length >= 6) return;
-  cards.push({ name: `卡片 ${cards.length + 1}`, limit: 50000, balance: 10000, rate: 1.25 });
+  cards.push({ name: `卡片 ${cards.length + 1}`, limit: 50000, balance: 10000, rate: 15 });
   renderCards(); updateAll();
 }
 
@@ -917,7 +917,7 @@ function updateSim() {
     return { months, totalInterest: Math.round(totalInterest), totalPay: Math.round(totalPaid) };
   }
 
-  const balances = cards.map(c => ({ balance: c.balance, limit: c.limit, rate: (c.rate || 1.25) / 100 }));
+  const balances = cards.map(c => ({ balance: c.balance, limit: c.limit, rate: (c.rate || 15) / 1200 }));
 
   // 全額繳清：直接顯示
   if (pay >= totalBal) {

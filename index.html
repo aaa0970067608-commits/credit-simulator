@@ -1029,9 +1029,10 @@ function updateTips() {
   if (total >= 740) {
     tips.push({ type:'good', icon:'🎉', text:`評分 ${total} 分，屬於優秀等級！申請一般貸款應可獲得較優利率。` });
   } else if (total >= 670) {
-    tips.push({ type:'good', icon:'👍', text:`評分 ${total} 分，屬於良好等級，高於美國平均714分。大多數貸款申請應可通過。` });
+    const vs714 = total >= 714 ? `高於美國平均714分` : `低於美國平均714分，差距 ${714 - total} 分`;
+    tips.push({ type:'good', icon:'👍', text:`評分 ${total} 分，屬於良好等級（${vs714}）。大多數貸款申請應可通過。` });
   } else {
-    tips.push({ type:'warn', icon:'📈', text:`評分 ${total} 分，建議先改善信用狀況再申請貸款，否則可能面臨較高利率或被拒。` });
+    tips.push({ type:'warn', icon:'📈', text:`評分 ${total} 分，低於美國平均714分，差距 ${714 - total} 分。建議先改善信用狀況再申請貸款，否則可能面臨較高利率或被拒。` });
   }
 
   const list = document.getElementById('tipsList');

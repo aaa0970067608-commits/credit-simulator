@@ -614,13 +614,27 @@
   <!-- ════════════════════════════════════════ -->
   <div class="step-panel" id="panel3">
 
-    <!-- 評分縮略顯示 -->
-    <div class="score-chip" onclick="goStep(2)">
-      <div class="score-chip-num" id="chipScore">—</div>
-      <div>
-        <div class="score-chip-label">模擬評分　點擊返回詳情</div>
-        <div id="chipTag" style="font-size:12px;font-weight:600;color:var(--muted)"></div>
+    <!-- Step 3 評分顯示（與 Step 2 同步） -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><span>🎯</span> 即時信用評分</div>
+      <div style="display:flex;align-items:flex-end;gap:8px;margin-bottom:4px;">
+        <div class="score-big" id="scoreNum3">—</div>
+        <div class="score-max">/ 850</div>
       </div>
+      <div id="statusTag3" class="status-tag good" style="display:none"></div>
+      <div class="score-bar-wrap">
+        <div class="score-bar-track"></div>
+        <div class="score-bar-indicator" id="scoreIndicator3" style="left:50%"></div>
+      </div>
+      <div class="zone-pills">
+        <span class="zone-pill" style="color:#ff4757">極差<small>300</small></span>
+        <span class="zone-pill" style="color:#ff8c42">尚可<small>580</small></span>
+        <span class="zone-pill" style="color:#ffd166">良好<small>670</small></span>
+        <span class="zone-pill" style="color:#00d4a0">優秀<small>740</small></span>
+        <span class="zone-pill" style="color:#00ffcc">頂尖<small>850</small></span>
+      </div>
+      <div class="factor-list" id="factorList3" style="margin-top:16px;"></div>
+      <div id="scoreImpact3" style="margin-top:12px;display:none;"></div>
     </div>
 
     <!-- 行動選擇 -->
@@ -798,7 +812,6 @@ function goStep(n) {
     updateLoanRateSuggestion(score);
     updateChip(score);
     if (n === 3) {
-      // re-run sim if action already selected
       if (selectedAction === 'repay') updateSim();
       if (selectedAction === 'loan')  updateLoan();
     }
@@ -1004,14 +1017,20 @@ function getScoreMeta(total) {
   return { color:'#ff4757', tagClass:'bad', tagText:'🚨 高度風險' };
 }
 
-function updateChip(total) {
+function updateChip(total, impactHtml) {
   const meta = getScoreMeta(total);
-  const el = document.getElementById('chipScore');
-  const tag = document.getElementById('chipTag');
-  el.textContent = total;
-  el.style.color = meta.color;
-  tag.textContent = meta.tagText;
-  tag.style.color = meta.color;
+  // Step 3 完整評分卡
+  const n3 = document.getElementById('scoreNum3');
+  const t3 = document.getElementById('statusTag3');
+  const i3 = document.getElementById('scoreIndicator3');
+  const imp3 = document.getElementById('scoreImpact3');
+  if (n3) { n3.textContent = total; n3.style.color = meta.color; }
+  if (t3) { t3.style.display='inline-flex'; t3.className=`status-tag ${meta.tagClass}`; t3.textContent=meta.tagText; }
+  if (i3) { i3.style.left = ((total-300)/550)*100 + '%'; }
+  if (imp3) {
+    if (impactHtml) { imp3.style.display='block'; imp3.innerHTML=impactHtml; }
+    else { imp3.style.display='none'; imp3.innerHTML=''; }
+  }
 }
 
 function updateScore() {
@@ -1062,6 +1081,11 @@ function updateScore() {
     （美國平均 714 分，${total>=714?'高於平均 ✦':`差距 ${714-total} 分`}）<br>
     <span style="opacity:0.5;font-size:10px;">※ 本工具為模擬參考，實際分數由各信用局綜合計算</span>
   `;
+  // 同步 Step 3 評分卡（清除衝擊提示，還原正常評分）
+  updateChip(total, null);
+  const _synkFL = document.getElementById('factorList3');
+  const _srcFL  = document.getElementById('factorList');
+  if (_synkFL && _srcFL) _synkFL.innerHTML = _srcFL.innerHTML;
   return {total,util,meta};
 }
 
@@ -1126,8 +1150,91 @@ function updateSim() {
     const res=document.getElementById('simResult');
     res.style.display='block';
     res.innerHTML=`<span style="color:#ff4757">❌ 未繳款 → 30天後通報信用局，扣 75–100 分（myFICO）<br><span style="font-size:11px;opacity:0.7">最低還款約 NT$${minPay.toLocaleString()}，建議至少繳最低還款</span></span>`;
+    // 連動評分：同時更新 Step 2 & Step 3
+    const { total } = calcScore();
+    const penalty = 88;
+    const newScore = Math.max(300, total - penalty);
+    // Step 2
+    const elS = document.getElementById('scoreNum');
+    elS.textContent = newScore; elS.style.color = '#ff4757';
+    const tag = document.getElementById('statusTag');
+    tag.style.display='inline-flex'; tag.className='status-tag bad'; tag.textContent='🚨 未繳款預估';
+    document.getElementById('scoreIndicator').style.left = ((newScore-300)/550)*100+'%';
+    const penaltyHtml = `⚠️ <strong style="color:#ff4757">本月未繳款預估影響</strong><br>目前模擬分 ${total} → 扣除遲繳罰分 −${penalty}<br>= 預估評分 <strong style="color:#ff4757;font-size:13px;">${newScore}</strong> 分<br><span style="opacity:0.5;font-size:10px;">※ 30天後通報信用局才正式影響（myFICO：75–100分）</span>`;
+    document.getElementById('formulaBox').style.display='block';
+    document.getElementById('formulaBox').innerHTML = penaltyHtml;
+    // Step 3（帶衝擊說明）
+    const impactHtml = `<div style="background:rgba(255,71,87,0.08);border:1px solid rgba(255,71,87,0.25);border-radius:10px;padding:10px 14px;font-size:12px;line-height:1.8;">
+      ⚠️ <strong style="color:#ff4757">未繳款預估衝擊</strong><br>
+      原評分 <strong style="color:#e8e8f0">${total}</strong> → 扣 ${penalty} 分 → 預估降至 <strong style="color:#ff4757;font-size:15px;">${newScore}</strong><br>
+      <span style="color:#6b6b85;font-size:10px;">30天後通報信用局才正式影響</span>
+    </div>`;
+    updateChip(newScore, impactHtml);
+    updateTips(newScore);
+    // 同步因素列表到 Step 3
+    const fl3c = document.getElementById('factorList3');
+    const fl2c = document.getElementById('factorList');
+    if(fl3c && fl2c) fl3c.innerHTML = fl2c.innerHTML;
     return;
   }
+  // ── 計算「還這筆後」的預估評分 ──
+  function calcProjectedScore(payAmount) {
+    // 複製卡片餘額，用雪崩法分配還款
+    let tempCards = cards.map(c => ({...c, balance: c.balance}));
+    let remaining = payAmount;
+    tempCards.sort((a,b) => (b.rate||15)-(a.rate||15)); // 高利率先還
+    for (const c of tempCards) {
+      const p = Math.min(c.balance, remaining);
+      c.balance -= p; remaining -= p;
+      if (remaining <= 0) break;
+    }
+    // 用新餘額重算 utilization & score（不改原始 cards）
+    const totalLim = tempCards.reduce((s,c) => s+c.limit, 0);
+    const totalBal2 = tempCards.reduce((s,c) => s+c.balance, 0);
+    const newUtil = totalLim > 0 ? (totalBal2/totalLim)*100 : 0;
+    let newBase = getUtilScore(newUtil);
+    let newPenalty = 0;
+    tempCards.forEach(c => {
+      const u = c.limit>0?(c.balance/c.limit)*100:0;
+      if(u>=100) newPenalty+=30; else if(u>=90) newPenalty+=20;
+      else if(u>=75) newPenalty+=10; else if(u>=50) newPenalty+=5;
+    });
+    const maxed = tempCards.filter(c=>c.limit>0&&(c.balance/c.limit)>=1).length;
+    if(maxed>=3) newPenalty+=30; else if(maxed>=2) newPenalty+=15;
+    return {
+      score: Math.max(300, Math.min(850, newBase - newPenalty + getLateScore() + getAgeScore() + getTypeScore() + getInquiryScore())),
+      util: newUtil
+    };
+  }
+
+  const currentScore = calcScore().total;
+  const { score: projScore, util: projUtil } = calcProjectedScore(pay);
+  const scoreDelta = projScore - currentScore;
+  const deltaColor = scoreDelta > 0 ? '#00d4a0' : scoreDelta < 0 ? '#ff4757' : '#6b6b85';
+  const deltaSign  = scoreDelta > 0 ? '+' : '';
+
+  // 更新 Step 2 & Step 3 評分（含衝擊說明）
+  const elS2 = document.getElementById('scoreNum');
+  const tag2 = document.getElementById('statusTag');
+  const ind2 = document.getElementById('scoreIndicator');
+  const meta2 = getScoreMeta(projScore);
+  if(elS2){ elS2.textContent=projScore; elS2.style.color=meta2.color; }
+  if(tag2){ tag2.style.display='inline-flex'; tag2.className=`status-tag ${meta2.tagClass}`; tag2.textContent=meta2.tagText; }
+  if(ind2){ ind2.style.left=((projScore-300)/550)*100+'%'; }
+
+  const impactHtml = `<div style="background:rgba(124,111,255,0.06);border:1px solid rgba(124,111,255,0.2);border-radius:10px;padding:10px 14px;font-size:12px;line-height:1.9;">
+    <div style="font-weight:600;color:#e8e8f0;margin-bottom:4px;">📊 還款後評分預估</div>
+    使用率 <span style="color:#e8e8f0">${getTotalUtil().toFixed(1)}%</span> → 還後 <span style="color:${projUtil<=30?'#00d4a0':'#ffd166'}">${projUtil.toFixed(1)}%</span><br>
+    評分 <span style="color:#e8e8f0">${currentScore}</span> → <span style="color:${meta2.color};font-size:15px;font-weight:700;">${projScore}</span>
+    <span style="color:${deltaColor};font-weight:600;"> （${deltaSign}${scoreDelta}）</span><br>
+    <span style="color:#6b6b85;font-size:10px;">※ 雪崩法試算（高利率先還）</span>
+  </div>`;
+  updateChip(projScore, impactHtml);
+  updateTips(projScore);
+  updateLoanRateSuggestion(projScore);
+  const _synkFL2 = document.getElementById('factorList3');
+  const _srcFL2  = document.getElementById('factorList');
+  if (_synkFL2 && _srcFL2) _synkFL2.innerHTML = _srcFL2.innerHTML;
   function calcRepay(monthlyPay,balsIn,strategy){
     let bals=balsIn.map(b=>({...b})); let months=0,totalInterest=0,totalPaid=0;
     while(months<360){
@@ -1160,6 +1267,21 @@ function updateSim() {
     grid.appendChild(box);
     document.getElementById('simResult').style.display='block';
     document.getElementById('simResult').innerHTML=`<span style="color:#00d4a0">✅ 全額繳清 → 不扣分，長期累積正面紀錄</span>`;
+    // 全額繳清後評分（使用率歸零）
+    const { score: fullScore } = calcProjectedScore(totalBal);
+    const fullDelta = fullScore - currentScore;
+    const fullMeta = getScoreMeta(fullScore);
+    const elSF = document.getElementById('scoreNum'); if(elSF){elSF.textContent=fullScore;elSF.style.color=fullMeta.color;}
+    const tagF = document.getElementById('statusTag'); if(tagF){tagF.style.display='inline-flex';tagF.className=`status-tag ${fullMeta.tagClass}`;tagF.textContent=fullMeta.tagText;}
+    const indF = document.getElementById('scoreIndicator'); if(indF){indF.style.left=((fullScore-300)/550)*100+'%';}
+    const fullImpact = `<div style="background:rgba(0,212,160,0.06);border:1px solid rgba(0,212,160,0.25);border-radius:10px;padding:10px 14px;font-size:12px;line-height:1.9;">
+      <div style="font-weight:600;color:#00d4a0;margin-bottom:4px;">🎉 全額繳清後評分預估</div>
+      使用率歸零 → 評分 <span style="color:#e8e8f0">${currentScore}</span> → <span style="color:${fullMeta.color};font-size:15px;font-weight:700;">${fullScore}</span>
+      <span style="color:#00d4a0;font-weight:600;"> (+${fullDelta})</span>
+    </div>`;
+    updateChip(fullScore, fullImpact);
+    updateTips(fullScore);
+    updateLoanRateSuggestion(fullScore);
     return;
   }
   const isMulti=cards.length>1;

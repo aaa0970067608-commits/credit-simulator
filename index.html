@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>信用風險模擬器 v2</title>
+<title>信用風險模擬器 v3</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
 
   :root {
     --bg: #0a0a0f; --surface: #13131a; --card: #1a1a24;
@@ -33,51 +33,78 @@
 
   .container { max-width: 900px; margin: 0 auto; padding: 40px 20px 80px; position: relative; z-index: 1; }
 
-  header { text-align: center; margin-bottom: 48px; }
-
+  /* ── HEADER ── */
+  header { text-align: center; margin-bottom: 40px; }
   .badge {
     display: inline-block; background: rgba(124,111,255,0.15);
     border: 1px solid rgba(124,111,255,0.3); color: var(--accent);
     font-size: 11px; font-weight: 600; letter-spacing: 2px;
     text-transform: uppercase; padding: 6px 14px; border-radius: 20px; margin-bottom: 20px;
   }
-
   h1 {
-    font-family: 'Bebas Neue', sans-serif; font-size: clamp(28px, 5vw, 48px);
+    font-family: 'Bebas Neue', sans-serif; font-size: clamp(28px,5vw,48px);
     line-height: 1.1; margin-bottom: 12px;
     background: linear-gradient(135deg, #fff 0%, rgba(124,111,255,0.9) 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
-
   .subtitle { color: var(--muted); font-size: 15px; }
 
+  /* ── PROGRESS STEPPER ── */
+  .stepper {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0; margin-bottom: 32px; position: relative;
+  }
+  .step-item {
+    display: flex; align-items: center; gap: 0;
+  }
+  .step-bubble {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 2px solid var(--border); background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif; font-size: 16px;
+    color: var(--muted); transition: all 0.4s; cursor: pointer; position: relative; z-index: 2;
+    flex-shrink: 0;
+  }
+  .step-bubble.active { border-color: var(--accent); background: rgba(124,111,255,0.2); color: var(--accent); box-shadow: 0 0 20px rgba(124,111,255,0.3); }
+  .step-bubble.done { border-color: var(--green); background: rgba(0,212,160,0.2); color: var(--green); }
+  .step-label {
+    font-size: 10px; color: var(--muted); margin-top: 6px; text-align: center;
+    white-space: nowrap; position: absolute; top: 38px; left: 50%; transform: translateX(-50%);
+    transition: color 0.3s;
+  }
+  .step-label.active { color: var(--accent); }
+  .step-label.done { color: var(--green); }
+  .step-wrap { position: relative; padding-bottom: 24px; display: flex; align-items: center; }
+  .step-line {
+    width: 60px; height: 2px; background: var(--border);
+    transition: background 0.4s; flex-shrink: 0;
+  }
+  .step-line.done { background: linear-gradient(90deg, var(--green), var(--accent)); }
+  @media (max-width: 480px) { .step-line { width: 32px; } }
+
+  /* ── CARD ── */
   .card {
     background: var(--card); border: 1px solid var(--border);
     border-radius: 20px; padding: 24px; margin-bottom: 16px;
     transition: border-color 0.3s;
   }
-  .card:hover { border-color: rgba(124,111,255,0.25); }
-
+  .card:hover { border-color: rgba(124,111,255,0.2); }
   .card-title {
     font-family: 'Bebas Neue', sans-serif; font-size: 13px;
     letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
     margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
   }
-
   .weight-badge {
     margin-left: auto; font-size: 11px; font-family: 'DM Sans', sans-serif;
     font-weight: 600; padding: 2px 8px; border-radius: 10px;
     background: rgba(124,111,255,0.15); color: var(--accent);
   }
-
   .note {
     font-size: 11px; color: var(--muted); line-height: 1.6;
     background: rgba(255,255,255,0.03); border-radius: 8px;
     padding: 8px 12px; margin-bottom: 14px;
   }
-
   label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
-
   input[type=number], input[type=text] {
     width: 100%; background: var(--surface); border: 1px solid var(--border);
     border-radius: 8px; padding: 10px 12px; color: var(--text);
@@ -86,36 +113,36 @@
   }
   input:focus { border-color: var(--accent); }
 
-  /* 還款紀錄 */
-  .late-selector {
-    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;
+  /* ── STEP PANELS ── */
+  .step-panel { display: none; animation: panelIn 0.35s ease; }
+  .step-panel.active { display: block; }
+  @keyframes panelIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
+  /* ── STEP 1: 五大因素 ── */
+  .late-selector { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
   .late-btn {
     flex: 1; min-width: 60px; padding: 10px 6px; border-radius: 10px;
     font-size: 12px; font-family: 'DM Sans', sans-serif; text-align: center;
     cursor: pointer; border: 1px solid var(--border); background: var(--surface);
     color: var(--muted); transition: all 0.25s; font-weight: 500;
   }
-  .late-btn.active-good { border-color: var(--green); background: rgba(0,212,160,0.12); color: var(--green); font-weight: 700; }
-  .late-btn.active-warn { border-color: var(--yellow); background: rgba(255,209,102,0.12); color: var(--yellow); font-weight: 700; }
-  .late-btn.active-bad { border-color: var(--orange); background: rgba(255,140,66,0.12); color: var(--orange); font-weight: 700; }
-  .late-btn.active-danger { border-color: var(--red); background: rgba(255,71,87,0.12); color: var(--red); font-weight: 700; }
+  .late-btn.active-good   { border-color: var(--green);  background: rgba(0,212,160,0.12);  color: var(--green);  font-weight:700; }
+  .late-btn.active-warn   { border-color: var(--yellow); background: rgba(255,209,102,0.12);color: var(--yellow); font-weight:700; }
+  .late-btn.active-bad    { border-color: var(--orange); background: rgba(255,140,66,0.12); color: var(--orange); font-weight:700; }
+  .late-btn.active-danger { border-color: var(--red);    background: rgba(255,71,87,0.12);  color: var(--red);    font-weight:700; }
 
-  /* 信用卡 */
   .cards-list { display: flex; flex-direction: column; gap: 12px; }
-
   .credit-card-row {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 12px; padding: 14px;
-    display: flex; flex-direction: column; gap: 10px;
+    border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px;
     animation: slideIn 0.3s ease;
   }
-
   .card-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
   @media (max-width: 640px) { .card-fields { grid-template-columns: 1fr; } }
-
-  @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
 
   .remove-btn {
     background: rgba(255,71,87,0.08); border: 1px solid rgba(255,71,87,0.2);
@@ -124,7 +151,6 @@
     font-family: 'DM Sans', sans-serif; transition: all 0.2s;
   }
   .remove-btn:hover { background: rgba(255,71,87,0.18); }
-
   .add-btn {
     background: rgba(124,111,255,0.08); border: 1px dashed rgba(124,111,255,0.3);
     color: var(--accent); border-radius: 12px; padding: 11px;
@@ -134,30 +160,23 @@
   }
   .add-btn:hover { background: rgba(124,111,255,0.18); border-style: solid; }
 
-  /* 信用年齡 */
   .age-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 4px; }
-
   .age-btn {
     padding: 10px 6px; border-radius: 10px; font-size: 11px;
-    font-family: 'DM Sans', sans-serif; text-align: center;
-    cursor: pointer; border: 1px solid var(--border);
-    background: var(--surface); color: var(--muted);
-    transition: all 0.25s; line-height: 1.4;
+    font-family: 'DM Sans', sans-serif; text-align: center; cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--muted); transition: all 0.25s; line-height: 1.4;
   }
-  .age-btn.active { border-color: var(--accent); background: rgba(124,111,255,0.12); color: var(--accent); font-weight: 700; }
+  .age-btn.active { border-color: var(--accent); background: rgba(124,111,255,0.12); color: var(--accent); font-weight:700; }
 
-  /* 信用種類 */
   .credit-types { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
-
   .type-row {
     display: flex; align-items: center; gap: 12px;
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px 14px; cursor: pointer;
-    transition: all 0.2s;
+    border-radius: 10px; padding: 10px 14px; cursor: pointer; transition: all 0.2s;
   }
   .type-row:hover { border-color: rgba(124,111,255,0.25); }
   .type-row.checked { border-color: var(--green); background: rgba(0,212,160,0.06); }
-
   .type-check {
     width: 18px; height: 18px; border-radius: 5px;
     border: 2px solid var(--border); background: transparent;
@@ -165,34 +184,44 @@
     font-size: 11px; flex-shrink: 0; transition: all 0.2s;
   }
   .type-row.checked .type-check { border-color: var(--green); background: var(--green); }
-
   .type-label { font-size: 13px; flex: 1; }
   .type-tag { font-size: 10px; color: var(--muted); }
 
-  /* 新申請次數 */
   .inquiry-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 4px; }
-
   .inq-btn {
     padding: 10px 6px; border-radius: 10px; font-size: 12px;
-    font-family: 'DM Sans', sans-serif; text-align: center;
-    cursor: pointer; border: 1px solid var(--border);
-    background: var(--surface); color: var(--muted);
-    transition: all 0.25s;
+    font-family: 'DM Sans', sans-serif; text-align: center; cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--muted); transition: all 0.25s;
   }
-  .inq-btn.active { border-color: var(--accent); background: rgba(124,111,255,0.12); color: var(--accent); font-weight: 700; }
+  .inq-btn.active { border-color: var(--accent); background: rgba(124,111,255,0.12); color: var(--accent); font-weight:700; }
 
-  /* 評分結果 */
-  .score-result {
-    display: flex; flex-direction: column; gap: 20px;
+  /* ── NEXT / BACK BUTTONS ── */
+  .nav-row {
+    display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end;
   }
+  .btn-back {
+    padding: 12px 24px; border-radius: 12px; font-size: 14px;
+    font-family: 'DM Sans', sans-serif; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--border); background: transparent; color: var(--muted);
+    transition: all 0.2s;
+  }
+  .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-next {
+    padding: 12px 32px; border-radius: 12px; font-size: 14px;
+    font-family: 'DM Sans', sans-serif; font-weight: 600; cursor: pointer;
+    border: none; background: linear-gradient(135deg, var(--accent), #a78bfa);
+    color: white; transition: all 0.25s; box-shadow: 0 4px 20px rgba(124,111,255,0.35);
+  }
+  .btn-next:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(124,111,255,0.5); }
 
+  /* ── STEP 2: 評分結果 ── */
+  .score-result { display: flex; flex-direction: column; gap: 20px; }
   .score-big {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 80px; line-height: 1;
-    letter-spacing: 3px; transition: color 0.5s;
+    font-family: 'Bebas Neue', sans-serif; font-size: 80px;
+    line-height: 1; letter-spacing: 3px; transition: color 0.5s;
   }
   .score-max { font-size: 20px; color: var(--muted); }
-
   .status-tag {
     display: inline-flex; align-items: center; gap: 5px;
     padding: 4px 12px; border-radius: 20px;
@@ -200,7 +229,7 @@
   }
   .status-tag.good { background: rgba(0,212,160,0.1); color: var(--green); border: 1px solid rgba(0,212,160,0.2); }
   .status-tag.warn { background: rgba(255,209,102,0.1); color: var(--yellow); border: 1px solid rgba(255,209,102,0.2); }
-  .status-tag.bad { background: rgba(255,71,87,0.1); color: var(--red); border: 1px solid rgba(255,71,87,0.2); }
+  .status-tag.bad  { background: rgba(255,71,87,0.1); color: var(--red); border: 1px solid rgba(255,71,87,0.2); }
 
   .score-bar-wrap {
     position: relative; height: 10px; background: var(--surface);
@@ -218,71 +247,70 @@
     transform: translateX(-50%);
     transition: left 0.6s cubic-bezier(0.34,1.56,0.64,1);
   }
-
   .zone-pills { display: flex; gap: 4px; margin-top: 10px; }
   .zone-pill {
-    flex: 1; text-align: center; font-size: 10px; font-weight: 700;
-    padding: 5px 2px; border-radius: 8px;
-    background: rgba(255,255,255,0.04); line-height: 1.5;
+    flex:1; text-align:center; font-size:10px; font-weight:700;
+    padding:5px 2px; border-radius:8px;
+    background: rgba(255,255,255,0.04); line-height:1.5;
   }
-  .zone-pill small { display: block; font-size: 9px; font-weight: 400; opacity: 0.55; }
+  .zone-pill small { display:block; font-size:9px; font-weight:400; opacity:0.55; }
 
-  /* 因素分解 */
   .factor-list { display: flex; flex-direction: column; gap: 10px; }
-
   .factor-row {
     display: flex; align-items: center; gap: 10px;
     background: var(--surface); border-radius: 10px; padding: 10px 14px;
   }
-
   .factor-icon { font-size: 16px; flex-shrink: 0; }
   .factor-name { font-size: 12px; color: var(--muted); flex: 1; }
   .factor-score { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; min-width: 50px; text-align: right; }
 
-  /* 逐卡分析 */
-  .breakdown-row {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 10px; font-size: 13px;
-  }
-  .breakdown-name { flex: 1; color: var(--muted); font-size: 12px; }
-  .breakdown-bar-wrap { flex: 2; height: 6px; background: var(--surface); border-radius: 6px; overflow: hidden; }
-  .breakdown-bar { height: 100%; border-radius: 6px; transition: width 0.5s ease; }
-  .breakdown-pct { width: 40px; text-align: right; font-size: 12px; font-weight: 500; }
-
-  /* 還款試算 */
-  .sim-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
-  .sim-val { color: var(--accent); font-weight: 600; }
-
-  input[type=range] { width: 100%; accent-color: var(--accent); cursor: pointer; }
-
-  .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
-  @media (max-width: 600px) { .method-grid { grid-template-columns: 1fr; } }
-
-  .method-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 14px; padding: 16px;
-    transition: all 0.25s; cursor: pointer; position: relative;
-  }
-  .method-card:hover { border-color: rgba(124,111,255,0.3); }
-  .method-card.best { border-color: var(--green); }
-  .method-card.best::after {
-    content: '推薦'; position: absolute; top: 10px; right: 10px;
-    font-size: 9px; font-weight: 700; color: var(--green);
-    background: rgba(0,212,160,0.15); padding: 2px 6px; border-radius: 6px;
-  }
-
-  .method-name { font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1px; margin-bottom: 8px; }
-  .method-stat { font-size: 11px; color: var(--muted); line-height: 1.8; }
-  .method-highlight { font-size: 13px; font-weight: 600; }
-
-  /* 推算小字 */
   .formula-box {
     font-size: 10px; color: var(--muted); line-height: 1.8;
-    background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px 12px;
-    margin-top: 16px;
+    background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px 12px; margin-top: 16px;
   }
 
-  /* 建議區 */
+  /* ── STEP 3: 行動選擇 ── */
+  .action-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;
+  }
+  @media (max-width: 540px) { .action-grid { grid-template-columns: 1fr; } }
+
+  .action-btn {
+    position: relative; padding: 28px 20px; border-radius: 20px;
+    border: 2px solid var(--border); background: var(--card);
+    cursor: pointer; text-align: center; transition: all 0.3s;
+    overflow: hidden;
+  }
+  .action-btn::before {
+    content: ''; position: absolute; inset: 0;
+    opacity: 0; transition: opacity 0.3s;
+    border-radius: 18px;
+  }
+  .action-btn.repay::before { background: radial-gradient(ellipse at 50% 0%, rgba(0,212,160,0.15) 0%, transparent 70%); }
+  .action-btn.loan::before  { background: radial-gradient(ellipse at 50% 0%, rgba(124,111,255,0.15) 0%, transparent 70%); }
+  .action-btn:hover::before, .action-btn.selected::before { opacity: 1; }
+  .action-btn.repay:hover, .action-btn.repay.selected { border-color: var(--green); box-shadow: 0 0 30px rgba(0,212,160,0.2); }
+  .action-btn.loan:hover,  .action-btn.loan.selected  { border-color: var(--accent); box-shadow: 0 0 30px rgba(124,111,255,0.2); }
+  .action-btn.selected { transform: translateY(-2px); }
+
+  .action-emoji { font-size: 36px; margin-bottom: 10px; display: block; }
+  .action-title {
+    font-family: 'Bebas Neue', sans-serif; font-size: 20px;
+    letter-spacing: 2px; margin-bottom: 6px;
+  }
+  .action-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .action-check {
+    position: absolute; top: 12px; right: 14px;
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; opacity: 0; transition: all 0.3s;
+    transform: scale(0.5);
+  }
+  .action-btn.repay .action-check { background: var(--green); }
+  .action-btn.loan  .action-check { background: var(--accent); }
+  .action-btn.selected .action-check { opacity: 1; transform: scale(1); }
+
+  /* 個人化建議 (step2 底部) */
   .tips-list { display: flex; flex-direction: column; gap: 10px; }
   .tip {
     display: flex; gap: 12px; align-items: flex-start;
@@ -291,10 +319,45 @@
   }
   .tip.good { border-left-color: var(--green); }
   .tip.warn { border-left-color: var(--yellow); }
-  .tip.bad { border-left-color: var(--red); }
+  .tip.bad  { border-left-color: var(--red); }
   .tip-icon { font-size: 18px; flex-shrink: 0; }
 
-  /* FICO 說明 */
+  /* ── EXPANDABLE PANELS ── */
+  .expand-panel {
+    overflow: hidden; max-height: 0;
+    transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease;
+    opacity: 0;
+  }
+  .expand-panel.open { max-height: 3000px; opacity: 1; }
+
+  /* ── 還款試算 ── */
+  .sim-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .sim-val { color: var(--accent); font-weight: 600; }
+  input[type=range] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+  .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+  @media (max-width: 600px) { .method-grid { grid-template-columns: 1fr; } }
+  .method-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px; transition: all 0.25s; position: relative;
+  }
+  .method-card:hover { border-color: rgba(124,111,255,0.3); }
+  .method-card.best { border-color: var(--green); }
+  .method-card.best::after {
+    content: '推薦'; position: absolute; top: 10px; right: 10px;
+    font-size: 9px; font-weight: 700; color: var(--green);
+    background: rgba(0,212,160,0.15); padding: 2px 6px; border-radius: 6px;
+  }
+  .method-name { font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1px; margin-bottom: 8px; }
+  .method-stat { font-size: 11px; color: var(--muted); line-height: 1.8; }
+  .method-highlight { font-size: 13px; font-weight: 600; }
+
+  .breakdown-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 13px; }
+  .breakdown-name { flex: 1; color: var(--muted); font-size: 12px; }
+  .breakdown-bar-wrap { flex: 2; height: 6px; background: var(--surface); border-radius: 6px; overflow: hidden; }
+  .breakdown-bar { height: 100%; border-radius: 6px; transition: width 0.5s ease; }
+  .breakdown-pct { width: 40px; text-align: right; font-size: 12px; font-weight: 500; }
+
+  /* ── 個人信貸 ── */
   .fico-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
   .fico-bar-label { font-size: 12px; width: 80px; }
   .fico-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 6px; overflow: hidden; }
@@ -302,1000 +365,404 @@
   .fico-bar-pct { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 1px; width: 32px; text-align: right; }
 
   @media (max-width: 640px) {
-    .card-fields { grid-template-columns: 1fr; }
-    .age-selector { grid-template-columns: repeat(2, 1fr); }
-    .inquiry-selector { grid-template-columns: repeat(2, 1fr); }
+    .age-selector { grid-template-columns: repeat(2,1fr); }
+    .inquiry-selector { grid-template-columns: repeat(2,1fr); }
   }
+
+  /* ── 回到頂部計算結果（step3 顯示縮略分數） ── */
+  .score-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 10px 18px; margin-bottom: 20px;
+    cursor: pointer; transition: border-color 0.2s;
+  }
+  .score-chip:hover { border-color: var(--accent); }
+  .score-chip-num { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; }
+  .score-chip-label { font-size: 11px; color: var(--muted); }
+
+  /* ── FICO 說明可折疊 ── */
+  .collapse-toggle {
+    font-size: 11px; color: var(--accent); cursor: pointer;
+    display: inline-flex; align-items: center; gap: 4px;
+    background: none; border: none; font-family: 'DM Sans', sans-serif;
+    padding: 0; margin-top: 10px;
+  }
+  .collapse-toggle:hover { opacity: 0.8; }
+  .collapsible { overflow: hidden; max-height: 0; transition: max-height 0.4s ease, opacity 0.3s; opacity: 0; }
+  .collapsible.open { max-height: 500px; opacity: 1; }
+
+  /* pulse anim for action buttons */
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(124,111,255,0.3); } 50% { box-shadow: 0 0 0 8px rgba(124,111,255,0); } }
+  .action-btn.loan:not(.selected):hover { animation: pulse 1.5s infinite; }
 </style>
 </head>
 <body>
 <div class="container">
 
-  <!-- Header -->
+  <!-- HEADER -->
   <header>
-    <div class="badge">信用風險模擬器</div>
+    <div class="badge">信用風險模擬器 v3</div>
     <h1>信用評分<br>模擬工具</h1>
-    <p class="subtitle">申請貸款前，先了解你的信用狀況｜本工具為模擬參考，非真實 FICO 計算</p>
+    <p class="subtitle">三步驟了解你的信用狀況｜本工具為模擬參考，非真實 FICO 計算</p>
   </header>
 
-  <!-- FICO 說明 -->
-  <div class="card">
-    <div class="card-title"><span>💡</span> 美國 FICO 評分組成（300–850）</div>
-    <div class="fico-bar-row">
-      <div class="fico-bar-label" style="color:#e8e8f0;font-weight:600;">還款紀錄</div>
-      <div class="fico-bar-track"><div class="fico-bar-fill" style="width:35%;background:#7c6fff"></div></div>
-      <div class="fico-bar-pct" style="color:#7c6fff">35%</div>
-    </div>
-    <div class="fico-bar-row">
-      <div class="fico-bar-label" style="color:#e8e8f0;font-weight:600;">額度使用率</div>
-      <div class="fico-bar-track"><div class="fico-bar-fill" style="width:30%;background:#00d4a0"></div></div>
-      <div class="fico-bar-pct" style="color:#00d4a0">30%</div>
-    </div>
-    <div class="fico-bar-row">
-      <div class="fico-bar-label" style="color:#e8e8f0;font-weight:600;">信用年齡</div>
-      <div class="fico-bar-track"><div class="fico-bar-fill" style="width:15%;background:#ffd166"></div></div>
-      <div class="fico-bar-pct" style="color:#ffd166">15%</div>
-    </div>
-    <div class="fico-bar-row">
-      <div class="fico-bar-label" style="color:#e8e8f0;font-weight:600;">信用種類</div>
-      <div class="fico-bar-track"><div class="fico-bar-fill" style="width:10%;background:#ff8c42"></div></div>
-      <div class="fico-bar-pct" style="color:#ff8c42">10%</div>
-    </div>
-    <div class="fico-bar-row">
-      <div class="fico-bar-label" style="color:#e8e8f0;font-weight:600;">新申請次數</div>
-      <div class="fico-bar-track"><div class="fico-bar-fill" style="width:10%;background:#ff4757"></div></div>
-      <div class="fico-bar-pct" style="color:#ff4757">10%</div>
-    </div>
-    <div style="margin-top:14px;font-size:11px;color:#6b6b85;padding-top:12px;border-top:1px solid #2a2a38;">
-      ← 本工具模擬 FICO <strong style="color:#e8e8f0">五大因素</strong> 對評分的影響
-    </div>
-    <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;">
-      <a href="https://www.myfico.com/credit-education/whats-in-your-credit-score" target="_blank" style="font-size:11px;color:#7c6fff;text-decoration:none;background:rgba(124,111,255,0.1);border:1px solid rgba(124,111,255,0.25);padding:4px 10px;border-radius:20px;">🔗 myFICO 官方說明</a>
-      <a href="https://www.consumerfinance.gov/ask-cfpb/what-is-a-credit-score-en-315/" target="_blank" style="font-size:11px;color:#7c6fff;text-decoration:none;background:rgba(124,111,255,0.1);border:1px solid rgba(124,111,255,0.25);padding:4px 10px;border-radius:20px;">🏛️ CFPB 消費者金融保護局</a>
-      <a href="https://www.experian.com/blogs/ask-experian/credit-education/score-basics/what-is-a-good-credit-score/" target="_blank" style="font-size:11px;color:#7c6fff;text-decoration:none;background:rgba(124,111,255,0.1);border:1px solid rgba(124,111,255,0.25);padding:4px 10px;border-radius:20px;">📊 Experian 評分指南</a>
-    </div>
-  </div>
-
-  <!-- 1. 還款紀錄 35% -->
-  <div class="card">
-    <div class="card-title"><span>📅</span> 還款紀錄 <span class="weight-badge">35%</span></div>
-    <div class="note">過去12個月，超過30天才算逾期（銀行才會通報信用局）<br>遲繳1–29天、當月補繳不算</div>
-    <label>你有幾次超過30天未還款？</label>
-    <div class="late-selector">
-      <div class="late-btn active-good" id="late-0" onclick="selectLate(0)">0次<br><small>✅ 良好</small></div>
-      <div class="late-btn" id="late-1" onclick="selectLate(1)">1次<br><small>⚠️ 注意</small></div>
-      <div class="late-btn" id="late-2" onclick="selectLate(2)">2–3次<br><small>🔴 偏差</small></div>
-      <div class="late-btn" id="late-3" onclick="selectLate(3)">4次以上<br><small>💀 嚴重</small></div>
-    </div>
-  </div>
-
-  <!-- 2. 額度使用率 30% -->
-  <div class="card">
-    <div class="card-title"><span>💳</span> 額度使用率 <span class="weight-badge">30%</span></div>
-    <div class="cards-list" id="cardsList"></div>
-    <button class="add-btn" onclick="addCard()">＋ 新增信用卡</button>
-
-    <!-- 逐卡分析 -->
-    <div id="breakdownWrap" style="margin-top:16px;display:none;">
-      <div style="font-size:11px;color:#6b6b85;margin-bottom:10px;letter-spacing:0.5px;">逐卡使用率</div>
-      <div id="breakdown"></div>
-    </div>
-  </div>
-
-  <!-- 3. 信用年齡 15% -->
-  <div class="card">
-    <div class="card-title"><span>🕐</span> 信用年齡 <span class="weight-badge">15%</span></div>
-    <div class="note">沒在用也算，帳戶沒關閉就計入年齡</div>
-    <label>你的信用卡開卡到現在多久了？</label>
-    <div class="age-selector">
-      <div class="age-btn" id="age-0" onclick="selectAge(0)">不到1年</div>
-      <div class="age-btn" id="age-1" onclick="selectAge(1)">1–3年</div>
-      <div class="age-btn" id="age-2" onclick="selectAge(2)">3–7年</div>
-      <div class="age-btn" id="age-3" onclick="selectAge(3)">7–15年</div>
-      <div class="age-btn" id="age-4" onclick="selectAge(4)">15年以上</div>
-      <div class="age-btn active" id="age-5" onclick="selectAge(5)">❓ 不確定</div>
-    </div>
-  </div>
-
-  <!-- 4. 信用種類 10% -->
-  <div class="card">
-    <div class="card-title"><span>🏦</span> 信用種類 <span class="weight-badge">10%</span></div>
-    <div class="note">有借貸關係的產品才算，且目前正常還款中</div>
-    <div class="credit-types" id="creditTypes">
-      <div class="type-row checked" data-type="card" onclick="toggleType(this)">
-        <div class="type-check">✓</div>
-        <div class="type-label">💳 信用卡</div>
-        <div class="type-tag">循環信用</div>
+  <!-- STEPPER -->
+  <div class="stepper">
+    <div class="step-item">
+      <div class="step-wrap">
+        <div class="step-bubble active" id="sb1" onclick="goStep(1)">1</div>
+        <div class="step-label active" id="sl1">填資料</div>
       </div>
-      <div class="type-row" data-type="auto" onclick="toggleType(this)">
-        <div class="type-check"></div>
-        <div class="type-label">🚗 車貸</div>
-        <div class="type-tag">分期貸款</div>
+    </div>
+    <div class="step-line" id="line1"></div>
+    <div class="step-item">
+      <div class="step-wrap">
+        <div class="step-bubble" id="sb2" onclick="goStep(2)">2</div>
+        <div class="step-label" id="sl2">看評分</div>
       </div>
-      <div class="type-row" data-type="mortgage" onclick="toggleType(this)">
-        <div class="type-check"></div>
-        <div class="type-label">🏠 房貸</div>
-        <div class="type-tag">分期貸款</div>
-      </div>
-      <div class="type-row" data-type="student" onclick="toggleType(this)">
-        <div class="type-check"></div>
-        <div class="type-label">🎓 學貸</div>
-        <div class="type-tag">分期貸款</div>
-      </div>
-      <div class="type-row" data-type="personal" onclick="toggleType(this)">
-        <div class="type-check"></div>
-        <div class="type-label">💰 個人信貸</div>
-        <div class="type-tag">分期貸款</div>
-      </div>
-      <div class="type-row" data-type="other" onclick="toggleType(this)">
-        <div class="type-check"></div>
-        <div class="type-label">📋 其他分期</div>
-        <div class="type-tag">分期貸款</div>
+    </div>
+    <div class="step-line" id="line2"></div>
+    <div class="step-item">
+      <div class="step-wrap">
+        <div class="step-bubble" id="sb3" onclick="goStep(3)">3</div>
+        <div class="step-label" id="sl3">採取行動</div>
       </div>
     </div>
   </div>
 
-  <!-- 5. 新申請次數 10% -->
-  <div class="card">
-    <div class="card-title"><span>🔍</span> 新申請次數 <span class="weight-badge">10%</span></div>
-    <div class="note">
-      ✅ 算：信用卡、房貸、車貸、學貸、個人信貸<br>
-      ❌ 不算：活存、數位帳戶、電商會員、一般網路帳號
+  <!-- ════════════════════════════════════════ -->
+  <!-- STEP 1: 填資料（五大因素）              -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="step-panel active" id="panel1">
+
+    <!-- FICO 說明 可折疊 -->
+    <div class="card">
+      <div class="card-title"><span>💡</span> 美國 FICO 評分組成（300–850）</div>
+      <div class="fico-bar-row">
+        <div class="fico-bar-label" style="color:#e8e8f0;font-weight:600;">還款紀錄</div>
+        <div class="fico-bar-track"><div class="fico-bar-fill" style="width:35%;background:#7c6fff"></div></div>
+        <div class="fico-bar-pct" style="color:#7c6fff">35%</div>
+      </div>
+      <div class="fico-bar-row">
+        <div class="fico-bar-label" style="color:#e8e8f0;font-weight:600;">額度使用率</div>
+        <div class="fico-bar-track"><div class="fico-bar-fill" style="width:30%;background:#00d4a0"></div></div>
+        <div class="fico-bar-pct" style="color:#00d4a0">30%</div>
+      </div>
+      <div class="fico-bar-row">
+        <div class="fico-bar-label" style="color:#e8e8f0;font-weight:600;">信用年齡</div>
+        <div class="fico-bar-track"><div class="fico-bar-fill" style="width:15%;background:#ffd166"></div></div>
+        <div class="fico-bar-pct" style="color:#ffd166">15%</div>
+      </div>
+      <div class="fico-bar-row">
+        <div class="fico-bar-label" style="color:#e8e8f0;font-weight:600;">信用種類</div>
+        <div class="fico-bar-track"><div class="fico-bar-fill" style="width:10%;background:#ff8c42"></div></div>
+        <div class="fico-bar-pct" style="color:#ff8c42">10%</div>
+      </div>
+      <div class="fico-bar-row">
+        <div class="fico-bar-label" style="color:#e8e8f0;font-weight:600;">新申請次數</div>
+        <div class="fico-bar-track"><div class="fico-bar-fill" style="width:10%;background:#ff4757"></div></div>
+        <div class="fico-bar-pct" style="color:#ff4757">10%</div>
+      </div>
+      <div id="ficoLinks" class="collapsible">
+        <div style="margin-top:14px;font-size:11px;color:#6b6b85;padding-top:12px;border-top:1px solid #2a2a38;">
+          ← 本工具模擬 FICO <strong style="color:#e8e8f0">五大因素</strong> 對評分的影響
+        </div>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;">
+          <a href="https://www.myfico.com/credit-education/whats-in-your-credit-score" target="_blank" style="font-size:11px;color:#7c6fff;text-decoration:none;background:rgba(124,111,255,0.1);border:1px solid rgba(124,111,255,0.25);padding:4px 10px;border-radius:20px;">🔗 myFICO 官方說明</a>
+          <a href="https://www.consumerfinance.gov/ask-cfpb/what-is-a-credit-score-en-315/" target="_blank" style="font-size:11px;color:#7c6fff;text-decoration:none;background:rgba(124,111,255,0.1);border:1px solid rgba(124,111,255,0.25);padding:4px 10px;border-radius:20px;">🏛️ CFPB 消費者金融保護局</a>
+          <a href="https://www.experian.com/blogs/ask-experian/credit-education/score-basics/what-is-a-good-credit-score/" target="_blank" style="font-size:11px;color:#7c6fff;text-decoration:none;background:rgba(124,111,255,0.1);border:1px solid rgba(124,111,255,0.25);padding:4px 10px;border-radius:20px;">📊 Experian 評分指南</a>
+        </div>
+      </div>
+      <button class="collapse-toggle" onclick="toggleFico(this)">
+        <span id="ficoToggleText">▼ 展開資料來源</span>
+      </button>
     </div>
-    <label>過去12個月，你申請了幾次信用產品？</label>
-    <div class="inquiry-selector">
-      <div class="inq-btn active" id="inq-0" onclick="selectInquiry(0)">0次<br><small>+5分</small></div>
-      <div class="inq-btn" id="inq-1" onclick="selectInquiry(1)">1次<br><small>基準 0分</small></div>
-      <div class="inq-btn" id="inq-2" onclick="selectInquiry(2)">2–3次<br><small>−10分</small></div>
-      <div class="inq-btn" id="inq-3" onclick="selectInquiry(3)">4–5次<br><small>−20分</small></div>
-      <div class="inq-btn" id="inq-4" onclick="selectInquiry(4)">6次以上<br><small>−35分</small></div>
+
+    <!-- 1. 還款紀錄 -->
+    <div class="card">
+      <div class="card-title"><span>📅</span> 還款紀錄 <span class="weight-badge">35%</span></div>
+      <div class="note">超過30天才算逾期（銀行才通報信用局）<br>遲繳1–29天、當月補繳不算</div>
+      <label>過去12個月，超過30天未還款幾次？</label>
+      <div class="late-selector">
+        <div class="late-btn active-good" id="late-0" onclick="selectLate(0)">0次<br><small>✅ 良好</small></div>
+        <div class="late-btn" id="late-1" onclick="selectLate(1)">1次<br><small>⚠️ 注意</small></div>
+        <div class="late-btn" id="late-2" onclick="selectLate(2)">2–3次<br><small>🔴 偏差</small></div>
+        <div class="late-btn" id="late-3" onclick="selectLate(3)">4次以上<br><small>💀 嚴重</small></div>
+      </div>
+    </div>
+
+    <!-- 2. 信用卡額度 -->
+    <div class="card">
+      <div class="card-title"><span>💳</span> 額度使用率 <span class="weight-badge">30%</span></div>
+      <div class="cards-list" id="cardsList"></div>
+      <button class="add-btn" onclick="addCard()">＋ 新增信用卡</button>
+      <div id="breakdownWrap" style="margin-top:16px;display:none;">
+        <div style="font-size:11px;color:#6b6b85;margin-bottom:10px;letter-spacing:0.5px;">逐卡使用率</div>
+        <div id="breakdown"></div>
+      </div>
+    </div>
+
+    <!-- 3. 信用年齡 -->
+    <div class="card">
+      <div class="card-title"><span>🕐</span> 信用年齡 <span class="weight-badge">15%</span></div>
+      <div class="note">沒在用也算，帳戶沒關閉就計入年齡</div>
+      <label>信用卡開卡到現在多久了？</label>
+      <div class="age-selector">
+        <div class="age-btn" id="age-0" onclick="selectAge(0)">不到1年</div>
+        <div class="age-btn" id="age-1" onclick="selectAge(1)">1–3年</div>
+        <div class="age-btn" id="age-2" onclick="selectAge(2)">3–7年</div>
+        <div class="age-btn" id="age-3" onclick="selectAge(3)">7–15年</div>
+        <div class="age-btn" id="age-4" onclick="selectAge(4)">15年以上</div>
+        <div class="age-btn active" id="age-5" onclick="selectAge(5)">❓ 不確定</div>
+      </div>
+    </div>
+
+    <!-- 4. 信用種類 -->
+    <div class="card">
+      <div class="card-title"><span>🏦</span> 信用種類 <span class="weight-badge">10%</span></div>
+      <div class="note">有借貸關係且正常還款中的產品才算</div>
+      <div class="credit-types" id="creditTypes">
+        <div class="type-row checked" data-type="card" onclick="toggleType(this)">
+          <div class="type-check">✓</div><div class="type-label">💳 信用卡</div><div class="type-tag">循環信用</div>
+        </div>
+        <div class="type-row" data-type="auto" onclick="toggleType(this)">
+          <div class="type-check"></div><div class="type-label">🚗 車貸</div><div class="type-tag">分期貸款</div>
+        </div>
+        <div class="type-row" data-type="mortgage" onclick="toggleType(this)">
+          <div class="type-check"></div><div class="type-label">🏠 房貸</div><div class="type-tag">分期貸款</div>
+        </div>
+        <div class="type-row" data-type="student" onclick="toggleType(this)">
+          <div class="type-check"></div><div class="type-label">🎓 學貸</div><div class="type-tag">分期貸款</div>
+        </div>
+        <div class="type-row" data-type="personal" onclick="toggleType(this)">
+          <div class="type-check"></div><div class="type-label">💰 個人信貸</div><div class="type-tag">分期貸款</div>
+        </div>
+        <div class="type-row" data-type="other" onclick="toggleType(this)">
+          <div class="type-check"></div><div class="type-label">📋 其他分期</div><div class="type-tag">分期貸款</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. 新申請次數 -->
+    <div class="card">
+      <div class="card-title"><span>🔍</span> 新申請次數 <span class="weight-badge">10%</span></div>
+      <div class="note">
+        ✅ 算：信用卡、房貸、車貸、學貸、個人信貸<br>
+        ❌ 不算：活存、數位帳戶、電商會員
+      </div>
+      <label>過去12個月申請幾次信用產品？</label>
+      <div class="inquiry-selector">
+        <div class="inq-btn active" id="inq-0" onclick="selectInquiry(0)">0次<br><small>+5分</small></div>
+        <div class="inq-btn" id="inq-1" onclick="selectInquiry(1)">1次<br><small>基準 0分</small></div>
+        <div class="inq-btn" id="inq-2" onclick="selectInquiry(2)">2–3次<br><small>−10分</small></div>
+        <div class="inq-btn" id="inq-3" onclick="selectInquiry(3)">4–5次<br><small>−20分</small></div>
+        <div class="inq-btn" id="inq-4" onclick="selectInquiry(4)">6次以上<br><small>−35分</small></div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-next" onclick="goStep(2)">計算評分 →</button>
     </div>
   </div>
 
-  <!-- 評分結果 -->
-  <div class="card">
-    <div class="card-title"><span>🎯</span> 信用評分影響</div>
-    <div class="score-result">
+  <!-- ════════════════════════════════════════ -->
+  <!-- STEP 2: 評分結果                        -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="step-panel" id="panel2">
+    <div class="card">
+      <div class="card-title"><span>🎯</span> 信用評分模擬結果</div>
+      <div class="score-result">
+        <div>
+          <div style="display:flex;align-items:flex-end;gap:8px;margin-bottom:4px;">
+            <div class="score-big" id="scoreNum">—</div>
+            <div class="score-max">/ 850</div>
+          </div>
+          <div id="statusTag" class="status-tag good" style="display:none"></div>
+          <div class="score-bar-wrap" id="scoreBarWrap">
+            <div class="score-bar-track"></div>
+            <div class="score-bar-indicator" id="scoreIndicator" style="left:50%"></div>
+          </div>
+          <div class="zone-pills">
+            <span class="zone-pill" style="color:#ff4757">極差<small>300</small></span>
+            <span class="zone-pill" style="color:#ff8c42">尚可<small>580</small></span>
+            <span class="zone-pill" style="color:#ffd166">良好<small>670</small></span>
+            <span class="zone-pill" style="color:#00d4a0">優秀<small>740</small></span>
+            <span class="zone-pill" style="color:#00ffcc">頂尖<small>850</small></span>
+          </div>
+        </div>
+        <div class="factor-list" id="factorList"></div>
+      </div>
+      <div class="formula-box" id="formulaBox" style="display:none"></div>
+    </div>
+
+    <!-- 個人化建議 -->
+    <div class="card">
+      <div class="card-title"><span>💬</span> 個人化改善建議</div>
+      <div class="tips-list" id="tipsList">
+        <div class="tip warn"><div class="tip-icon">👆</div><div>請先回第1步填寫資料</div></div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goStep(1)">← 返回修改</button>
+      <button class="btn-next" onclick="goStep(3)">採取行動 →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- STEP 3: 採取行動                        -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="step-panel" id="panel3">
+
+    <!-- 評分縮略顯示 -->
+    <div class="score-chip" onclick="goStep(2)">
+      <div class="score-chip-num" id="chipScore">—</div>
       <div>
-        <div style="display:flex;align-items:flex-end;gap:8px;margin-bottom:4px;">
-          <div class="score-big" id="scoreNum">—</div>
-          <div class="score-max">/ 850</div>
+        <div class="score-chip-label">模擬評分　點擊返回詳情</div>
+        <div id="chipTag" style="font-size:12px;font-weight:600;color:var(--muted)"></div>
+      </div>
+    </div>
+
+    <!-- 行動選擇 -->
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">你現在想做什麼？</div>
+    <div class="action-grid">
+      <div class="action-btn repay" id="actionRepay" onclick="selectAction('repay')">
+        <div class="action-check">✓</div>
+        <span class="action-emoji">💳</span>
+        <div class="action-title">還信用卡</div>
+        <div class="action-desc">試算還款方案<br>雪崩法 vs 雪球法</div>
+      </div>
+      <div class="action-btn loan" id="actionLoan" onclick="selectAction('loan')">
+        <div class="action-check">✓</div>
+        <span class="action-emoji">🏦</span>
+        <div class="action-title">申請貸款</div>
+        <div class="action-desc">個人信貸試算<br>依評分推薦利率範圍</div>
+      </div>
+    </div>
+
+    <!-- 還款試算（展開） -->
+    <div class="expand-panel" id="expandRepay">
+      <div class="card" style="border-color:rgba(0,212,160,0.25);">
+        <div class="card-title"><span>💰</span> 還款試算</div>
+
+        <div style="margin-bottom:16px;">
+          <div style="font-size:11px;color:#6b6b85;margin-bottom:8px;">📅 還款行為（依金額自動判斷）</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div id="ph-full"    style="flex:1;padding:8px 4px;border-radius:10px;font-size:10px;text-align:center;border:1px solid #2a2a38;background:#13131a;color:#6b6b85;transition:all 0.3s;">✅ 全額繳清</div>
+            <div id="ph-partial" style="flex:1;padding:8px 4px;border-radius:10px;font-size:10px;text-align:center;border:1px solid #2a2a38;background:#13131a;color:#6b6b85;transition:all 0.3s;">💳 部分繳清</div>
+            <div id="ph-min"     style="flex:1;padding:8px 4px;border-radius:10px;font-size:10px;text-align:center;border:1px solid #2a2a38;background:#13131a;color:#6b6b85;transition:all 0.3s;">⚠️ 只還最低</div>
+            <div id="ph-none"    style="flex:1;padding:8px 4px;border-radius:10px;font-size:10px;text-align:center;border:1px solid #2a2a38;background:#13131a;color:#6b6b85;transition:all 0.3s;">❌ 未繳款</div>
+          </div>
         </div>
-        <div id="statusTag" class="status-tag good" style="display:none"></div>
-        <div class="score-bar-wrap" id="scoreBarWrap">
-          <div class="score-bar-track"></div>
-          <div class="score-bar-indicator" id="scoreIndicator" style="left:50%"></div>
+
+        <div class="sim-label"><span>這個月還款金額</span></div>
+        <input type="range" id="simSlider" min="0" max="100000" step="100" value="0" oninput="syncFromSlider()">
+        <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <label>還款金額（NT$）</label>
+            <input type="number" id="simInput" value="0" min="0" step="100" oninput="syncFromInput()" style="margin-top:4px;">
+          </div>
         </div>
-        <div class="zone-pills" id="zonePills">
-          <span class="zone-pill" style="color:#ff4757">極差<small>300</small></span>
-          <span class="zone-pill" style="color:#ff8c42">尚可<small>580</small></span>
-          <span class="zone-pill" style="color:#ffd166">良好<small>670</small></span>
-          <span class="zone-pill" style="color:#00d4a0">優秀<small>740</small></span>
-          <span class="zone-pill" style="color:#00ffcc">頂尖<small>850</small></span>
+        <div style="font-size:10px;color:#6b6b85;margin-top:6px;margin-bottom:16px;">
+          利率已在各信用卡欄位個別設定（預設月利率1.25%／年利率15%）
         </div>
-      </div>
-      <div class="factor-list" id="factorList"></div>
-    </div>
-    <div class="formula-box" id="formulaBox" style="display:none"></div>
-  </div>
-
-  <!-- 還款試算 -->
-  <div class="card" id="simCard" style="display:none">
-    <div class="card-title"><span>💰</span> 還款試算</div>
-
-    <!-- 還款行為連動 -->
-    <div style="margin-bottom:16px;">
-      <div style="font-size:11px;color:#6b6b85;margin-bottom:8px;">📅 還款行為（依金額自動判斷）</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <div id="ph-full"    style="flex:1;padding:8px 4px;border-radius:10px;font-size:10px;text-align:center;border:1px solid #2a2a38;background:#13131a;color:#6b6b85;transition:all 0.3s;">✅ 全額繳清</div>
-        <div id="ph-partial" style="flex:1;padding:8px 4px;border-radius:10px;font-size:10px;text-align:center;border:1px solid #2a2a38;background:#13131a;color:#6b6b85;transition:all 0.3s;">💳 部分繳清</div>
-        <div id="ph-min"     style="flex:1;padding:8px 4px;border-radius:10px;font-size:10px;text-align:center;border:1px solid #2a2a38;background:#13131a;color:#6b6b85;transition:all 0.3s;">⚠️ 只還最低</div>
-        <div id="ph-none"    style="flex:1;padding:8px 4px;border-radius:10px;font-size:10px;text-align:center;border:1px solid #2a2a38;background:#13131a;color:#6b6b85;transition:all 0.3s;">❌ 未繳款</div>
+        <div id="methodGrid"></div>
+        <div id="simResult" style="margin-top:12px;background:#13131a;border-radius:12px;padding:14px;font-size:12px;line-height:1.8;display:none;"></div>
       </div>
     </div>
 
-    <!-- 滑桿 + 數字輸入同步 -->
-    <div class="sim-label">
-      <span>這個月還款金額</span>
-    </div>
-    <input type="range" id="simSlider" min="0" max="100000" step="100" value="0" oninput="syncFromSlider()">
+    <!-- 信貸試算（展開） -->
+    <div class="expand-panel" id="expandLoan">
+      <div class="card" style="border-color:rgba(124,111,255,0.25);">
+        <div class="card-title"><span>🏦</span> 個人信貸試算</div>
 
-    <!-- 金額輸入 + 利率並排 -->
-    <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div>
-        <label>還款金額（NT$）</label>
-        <input type="number" id="simInput" value="0" min="0" step="100" oninput="syncFromInput()" style="margin-top:4px;">
-      </div>
-    </div>
-    <div style="font-size:10px;color:#6b6b85;margin-top:6px;margin-bottom:16px;">
-      利率已在各信用卡欄位個別設定（預設月利率1.25%／年利率15%）
-    </div>
-
-    <!-- 試算結果 -->
-    <div id="methodGrid"></div>
-
-    <!-- 還款行為說明 -->
-    <div id="simResult" style="margin-top:12px;background:#13131a;border-radius:12px;padding:14px;font-size:12px;line-height:1.8;display:none;"></div>
-  </div>
-
-  <!-- 個人信貸試算 -->
-  <div class="card" id="loanCard">
-    <div class="card-title"><span>🏦</span> 個人信貸試算</div>
-
-    <!-- 評分對應利率建議 -->
-    <div id="loanRateSuggestion" style="background:rgba(124,111,255,0.08);border:1px solid rgba(124,111,255,0.2);border-radius:12px;padding:14px;margin-bottom:16px;font-size:12px;line-height:1.8;">
-      <div style="color:#7c6fff;font-weight:600;margin-bottom:6px;">💡 根據你的信用評分，參考利率範圍：</div>
-      <div id="loanRateText" style="color:#e8e8f0;">請先填寫上方五項資料取得評分</div>
-      <div style="color:#6b6b85;font-size:10px;margin-top:6px;">參考來源：AlphaLoan 信貸統計｜實際利率依各銀行審核為準，通常高於廣告最低利率</div>
-    </div>
-
-    <!-- 輸入區 -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-      <div>
-        <label>借款金額（NT$）</label>
-        <input type="number" id="loanAmount" value="300000" min="10000" step="10000" oninput="updateLoan()" style="margin-top:4px;">
-      </div>
-      <div>
-        <label>月薪（NT$）<span style="color:#6b6b85;font-size:10px;">選填</span></label>
-        <input type="number" id="monthlySalary" placeholder="例：40000" min="0" step="1000" oninput="updateLoan()" style="margin-top:4px;">
-      </div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-      <div>
-        <label>還款期數</label>
-        <select id="loanTerm" onchange="updateLoan()" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;margin-top:4px;">
-          <option value="12">12個月（1年）</option>
-          <option value="24">24個月（2年）</option>
-          <option value="36" selected>36個月（3年）</option>
-          <option value="48">48個月（4年）</option>
-          <option value="60">60個月（5年）</option>
-          <option value="84">84個月（7年）</option>
-        </select>
-      </div>
-      <div>
-        <label>年利率（%）</label>
-        <input type="number" id="loanRate" value="8" min="2" max="15" step="0.5" oninput="updateLoan()" style="margin-top:4px;">
-      </div>
-    </div>
-
-    <div style="font-size:10px;color:#6b6b85;margin-bottom:16px;">
-      月利率 ≈ <span id="loanMonthRate" style="color:#ffd166;font-weight:600;">0.67%</span>　年利率法定上限 15%
-    </div>
-
-    <!-- 月薪結果 -->
-    <div id="salaryResult" style="font-size:11px;color:#6b6b85;margin-bottom:12px;line-height:1.8;"></div>
-
-    <!-- 試算結果 -->
-    <div id="loanResult" style="background:#13131a;border-radius:14px;padding:18px;display:none;">
-      <!-- 每月還款大標 -->
-      <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:14px;margin-bottom:10px;">
-        <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">每月還款（本金＋利息）</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:40px;color:#7c6fff;letter-spacing:2px;" id="loanMonthly">—</div>
-        <div style="font-size:11px;color:#6b6b85;">NT$</div>
-        <div style="font-size:11px;color:#6b6b85;margin-top:6px;">
-          本金 <span id="loanMonthPrincipal" style="color:#e8e8f0;font-weight:600;">—</span> ＋ 利息 <span id="loanMonthInterest" style="color:#ff4757;font-weight:600;">—</span>（第1個月）
+        <div id="loanRateSuggestion" style="background:rgba(124,111,255,0.08);border:1px solid rgba(124,111,255,0.2);border-radius:12px;padding:14px;margin-bottom:16px;font-size:12px;line-height:1.8;">
+          <div style="color:#7c6fff;font-weight:600;margin-bottom:6px;">💡 根據你的信用評分，參考利率範圍：</div>
+          <div id="loanRateText" style="color:#e8e8f0;">計算中...</div>
+          <div style="color:#6b6b85;font-size:10px;margin-top:6px;">參考來源：AlphaLoan｜實際利率依各銀行審核為準</div>
         </div>
-      </div>
-      <!-- 四格 -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
-          <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">總還款金額</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#e8e8f0;letter-spacing:1px;" id="loanTotal">—</div>
-          <div style="font-size:11px;color:#6b6b85;">NT$</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <label>借款金額（NT$）</label>
+            <input type="number" id="loanAmount" value="300000" min="10000" step="10000" oninput="updateLoan()" style="margin-top:4px;">
+          </div>
+          <div>
+            <label>月薪（NT$）<span style="color:#6b6b85;font-size:10px;">選填</span></label>
+            <input type="number" id="monthlySalary" placeholder="例：40000" min="0" step="1000" oninput="updateLoan()" style="margin-top:4px;">
+          </div>
         </div>
-        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
-          <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">總利息</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;" id="loanInterest">—</div>
-          <div style="font-size:11px;color:#6b6b85;">NT$</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div>
+            <label>還款期數</label>
+            <select id="loanTerm" onchange="updateLoan()" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;margin-top:4px;">
+              <option value="12">12個月（1年）</option>
+              <option value="24">24個月（2年）</option>
+              <option value="36" selected>36個月（3年）</option>
+              <option value="48">48個月（4年）</option>
+              <option value="60">60個月（5年）</option>
+              <option value="84">84個月（7年）</option>
+            </select>
+          </div>
+          <div>
+            <label>年利率（%）</label>
+            <input type="number" id="loanRate" value="8" min="2" max="15" step="0.5" oninput="updateLoan()" style="margin-top:4px;">
+          </div>
         </div>
-        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
-          <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">年利率</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#ffd166;letter-spacing:1px;" id="loanRateDisplay">—</div>
-          <div style="font-size:11px;color:#6b6b85;">%</div>
+        <div style="font-size:10px;color:#6b6b85;margin-bottom:16px;">
+          月利率 ≈ <span id="loanMonthRate" style="color:#ffd166;font-weight:600;">0.67%</span>　年利率法定上限 15%
         </div>
-        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
-          <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">還款期數</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#00d4a0;letter-spacing:1px;" id="loanTermDisplay">—</div>
-          <div style="font-size:11px;color:#6b6b85;">個月</div>
+        <div id="salaryResult" style="font-size:11px;color:#6b6b85;margin-bottom:12px;line-height:1.8;"></div>
+
+        <div id="loanResult" style="background:#13131a;border-radius:14px;padding:18px;display:none;">
+          <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:14px;margin-bottom:10px;">
+            <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">每月還款（本金＋利息）</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:40px;color:#7c6fff;letter-spacing:2px;" id="loanMonthly">—</div>
+            <div style="font-size:11px;color:#6b6b85;">NT$</div>
+            <div style="font-size:11px;color:#6b6b85;margin-top:6px;">
+              本金 <span id="loanMonthPrincipal" style="color:#e8e8f0;font-weight:600;">—</span> ＋ 利息 <span id="loanMonthInterest" style="color:#ff4757;font-weight:600;">—</span>（第1個月）
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
+              <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">總還款金額</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#e8e8f0;letter-spacing:1px;" id="loanTotal">—</div>
+              <div style="font-size:11px;color:#6b6b85;">NT$</div>
+            </div>
+            <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
+              <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">總利息</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;" id="loanInterest">—</div>
+              <div style="font-size:11px;color:#6b6b85;">NT$</div>
+            </div>
+            <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
+              <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">年利率</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#ffd166;letter-spacing:1px;" id="loanRateDisplay">—</div>
+              <div style="font-size:11px;color:#6b6b85;">%</div>
+            </div>
+            <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
+              <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">還款期數</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#00d4a0;letter-spacing:1px;" id="loanTermDisplay">—</div>
+              <div style="font-size:11px;color:#6b6b85;">個月</div>
+            </div>
+          </div>
+          <div id="dtiResult" style="margin-top:12px;font-size:12px;line-height:1.8;display:none;"></div>
         </div>
       </div>
-      <!-- DTI警示 -->
-      <div id="dtiResult" style="margin-top:12px;font-size:12px;line-height:1.8;display:none;"></div>
+    </div>
+
+    <div class="nav-row" style="justify-content:flex-start;">
+      <button class="btn-back" onclick="goStep(2)">← 返回評分</button>
     </div>
   </div>
 
-  <!-- 個人化建議 -->
-  <div class="card">
-    <div class="card-title"><span>💬</span> 個人化改善建議</div>
-    <div class="tips-list" id="tipsList">
-      <div class="tip warn">
-        <div class="tip-icon">👆</div>
-        <div>請填寫上方資料，系統將自動產生建議</div>
-      </div>
-    </div>
-  </div>
+</div><!-- /container -->
 
-</div>
-
-<script>
-// ==================== 狀態 ====================
-let cards = [{ name: '卡片 1', limit: 100000, balance: 30000, rate: 15 }];
-let latePayments = 0;    // 0,1,2,3 → 0次/1次/2-3次/4+次
-let creditAge = 5;       // -1=不確定
-let creditAgeIdx = 5;
-let creditTypes = new Set(['card']);
-let inquiryIdx = 0;
-
-// ==================== 還款紀錄 ====================
-function selectLate(idx) {
-  latePayments = idx;
-  const classes = ['active-good','active-warn','active-bad','active-danger'];
-  [0,1,2,3].forEach(i => {
-    const btn = document.getElementById('late-' + i);
-    btn.className = 'late-btn';
-    if (i === idx) btn.classList.add(classes[i]);
-  });
-  updateAll();
-}
-
-function getLateScore() {
-  const scores = [0, -30, -60, -88];
-  return scores[latePayments];
-}
-
-// ==================== 信用卡 ====================
-function renderCards() {
-  const list = document.getElementById('cardsList');
-  list.innerHTML = '';
-  cards.forEach((c, i) => {
-    const row = document.createElement('div');
-    row.className = 'credit-card-row';
-    row.innerHTML = `
-      <div class="input-group">
-        <label>卡片名稱</label>
-        <input type="text" value="${c.name}" placeholder="例：玉山信用卡" oninput="cards[${i}].name=this.value;updateAll()">
-      </div>
-      <div class="card-fields">
-        <div class="input-group">
-          <label>總額度（NT$）</label>
-          <input type="number" value="${c.limit}" placeholder="100000" style="border-color:rgba(124,111,255,0.3)" oninput="cards[${i}].limit=+this.value||0;updateAll()">
-        </div>
-        <div class="input-group">
-          <label>已使用（NT$）</label>
-          <input type="number" value="${c.balance}" placeholder="30000" style="border-color:rgba(255,107,157,0.3)" oninput="cards[${i}].balance=+this.value||0;updateAll()">
-        </div>
-        <div class="input-group">
-          <label>年循環利率（%）</label>
-          <input type="number" value="${c.rate || 15}" placeholder="15" min="5" max="15" step="0.5" style="border-color:rgba(255,209,102,0.3)" oninput="let v=Math.min(Math.max(+this.value||15,0.1),15);cards[${i}].rate=v;this.nextElementSibling.querySelector('span').textContent=(v/12).toFixed(2)+'%';updateAll()">
-          <div style="font-size:10px;color:#6b6b85;margin-top:4px;">月利率 ≈ <span style="color:#ffd166;font-weight:600;">${((c.rate||15)/12).toFixed(2)}%</span>　範圍 5%–15%（法定上限）</div>
-        </div>
-      </div>
-      ${cards.length > 1 ? `<button class="remove-btn" onclick="removeCard(${i})">✕ 移除此卡</button>` : ''}
-    `;
-    list.appendChild(row);
-  });
-}
-
-function addCard() {
-  if (cards.length >= 6) return;
-  cards.push({ name: `卡片 ${cards.length + 1}`, limit: 50000, balance: 10000, rate: 15 });
-  renderCards(); updateAll();
-}
-
-function removeCard(i) {
-  cards.splice(i, 1); renderCards(); updateAll();
-}
-
-function getTotalUtil() {
-  const limit = cards.reduce((s,c) => s + c.limit, 0);
-  const bal = cards.reduce((s,c) => s + c.balance, 0);
-  return limit > 0 ? (bal / limit) * 100 : 0;
-}
-
-function getColor(pct) {
-  if (pct <= 10) return '#00d4a0';
-  if (pct <= 30) return '#00d4a0';
-  if (pct <= 50) return '#ffd166';
-  if (pct <= 75) return '#ff8c42';
-  return '#ff4757';
-}
-
-function getUtilScore(util) {
-  if (util <= 0)  return 750;
-  if (util <= 5)  return 755;
-  if (util <= 10) return 760;
-  if (util <= 20) return 745;
-  if (util <= 30) return 720;
-  if (util <= 40) return 690;
-  if (util <= 50) return 655;
-  if (util <= 60) return 615;
-  if (util <= 75) return 570;
-  if (util <= 90) return 525;
-  if (util <= 99) return 480;
-  return 440;
-}
-
-function updateBreakdown() {
-  const wrap = document.getElementById('breakdownWrap');
-  const bd = document.getElementById('breakdown');
-  if (cards.length === 0) { wrap.style.display = 'none'; return; }
-  wrap.style.display = 'block';
-  bd.innerHTML = '';
-  cards.forEach(c => {
-    const pct = c.limit > 0 ? Math.min((c.balance / c.limit) * 100, 100) : 0;
-    const color = getColor(pct);
-    const row = document.createElement('div');
-    row.className = 'breakdown-row';
-    row.innerHTML = `
-      <div class="breakdown-name">${c.name}</div>
-      <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:${pct}%;background:${color}"></div></div>
-      <div class="breakdown-pct" style="color:${color}">${pct.toFixed(0)}%</div>
-    `;
-    bd.appendChild(row);
-  });
-}
-
-// ==================== 信用年齡 ====================
-const ageScores = [-45, -25, -10, 0, 15, -10];
-const ageLabels = ['不到1年', '1–3年', '3–7年', '7–15年', '15年以上', '不確定（以5年估算）'];
-
-function selectAge(idx) {
-  creditAgeIdx = idx;
-  [0,1,2,3,4,5].forEach(i => {
-    document.getElementById('age-'+i).classList.toggle('active', i === idx);
-  });
-  updateAll();
-}
-
-function getAgeScore() { return ageScores[creditAgeIdx]; }
-
-// ==================== 信用種類 ====================
-function toggleType(el) {
-  const type = el.dataset.type;
-  if (type === 'card') return; // 信用卡不能取消
-  el.classList.toggle('checked');
-  const check = el.querySelector('.type-check');
-  if (el.classList.contains('checked')) {
-    creditTypes.add(type);
-    check.textContent = '✓';
-  } else {
-    creditTypes.delete(type);
-    check.textContent = '';
-  }
-  updateAll();
-}
-
-function getTypeScore() {
-  const n = creditTypes.size;
-  if (n <= 1) return 0;
-  if (n === 2) return 10;
-  if (n === 3) return 15;
-  return 20;
-}
-
-// ==================== 新申請次數 ====================
-const inquiryScores = [5, 0, -10, -20, -35];
-
-function selectInquiry(idx) {
-  inquiryIdx = idx;
-  [0,1,2,3,4].forEach(i => {
-    document.getElementById('inq-'+i).classList.toggle('active', i === idx);
-  });
-  updateAll();
-}
-
-function getInquiryScore() { return inquiryScores[inquiryIdx]; }
-
-// ==================== 評分計算 ====================
-function calcScore() {
-  const util = getTotalUtil();
-  let base = getUtilScore(util);
-
-  // 逐卡懲罰
-  let perCardPenalty = 0;
-  cards.forEach(c => {
-    const u = c.limit > 0 ? (c.balance / c.limit) * 100 : 0;
-    if (u >= 100) perCardPenalty += 30;
-    else if (u >= 90) perCardPenalty += 20;
-    else if (u >= 75) perCardPenalty += 10;
-    else if (u >= 50) perCardPenalty += 5;
-  });
-  const maxed = cards.filter(c => c.limit > 0 && (c.balance/c.limit) >= 1).length;
-  if (maxed >= 3) perCardPenalty += 30;
-  else if (maxed >= 2) perCardPenalty += 15;
-
-  const lateScore = getLateScore();
-  const ageScore = getAgeScore();
-  const typeScore = getTypeScore();
-  const inqScore = getInquiryScore();
-
-  const total = Math.max(300, Math.min(850, base - perCardPenalty + lateScore + ageScore + typeScore + inqScore));
-  return { total, base, perCardPenalty, lateScore, ageScore, typeScore, inqScore, util };
-}
-
-function updateScore() {
-  const { total, base, perCardPenalty, lateScore, ageScore, typeScore, inqScore, util } = calcScore();
-
-  const el = document.getElementById('scoreNum');
-  el.textContent = total;
-
-  let color, tagClass, tagText;
-  if (total >= 780)      { color = '#00ffcc'; tagClass = 'good'; tagText = '✦ 頂尖'; }
-  else if (total >= 740) { color = '#00d4a0'; tagClass = 'good'; tagText = '✦ 優秀'; }
-  else if (total >= 670) { color = '#00d4a0'; tagClass = 'good'; tagText = '✦ 良好'; }
-  else if (total >= 580) { color = '#ffd166'; tagClass = 'warn'; tagText = '⚠ 尚可'; }
-  else if (total >= 450) { color = '#ff8c42'; tagClass = 'warn'; tagText = '✕ 需改善'; }
-  else                   { color = '#ff4757'; tagClass = 'bad'; tagText = '🚨 高度風險'; }
-
-  el.style.color = color;
-  const tag = document.getElementById('statusTag');
-  tag.style.display = 'inline-flex';
-  tag.className = `status-tag ${tagClass}`;
-  tag.textContent = tagText;
-
-  const pct = ((total - 300) / 550) * 100;
-  const indicator = document.getElementById('scoreIndicator');
-  const barWrap = document.getElementById('scoreBarWrap');
-  barWrap.style.display = 'block';
-  indicator.style.display = 'block';
-  indicator.style.left = pct + '%';
-  document.getElementById('zonePills').style.display = 'flex';
-
-  // 因素分解
-  const avgScore = 714;
-  const factors = [
-    { icon: '📅', name: `還款紀錄（35%）`, score: lateScore, base: 0 },
-    { icon: '💳', name: `使用率 ${util.toFixed(1)}%（30%）`, score: base - perCardPenalty, base: 720 },
-    { icon: '🕐', name: `信用年齡（15%）`, score: ageScore, base: 0 },
-    { icon: '🏦', name: `信用種類 ${creditTypes.size}種（10%）`, score: typeScore, base: 0 },
-    { icon: '🔍', name: `新申請次數（10%）`, score: inqScore, base: 0 },
-  ];
-
-  const fl = document.getElementById('factorList');
-  fl.innerHTML = '';
-  factors.forEach(f => {
-    const div = document.createElement('div');
-    div.className = 'factor-row';
-    const sc = f.name.includes('使用率') ? f.score : f.score;
-    const scColor = f.name.includes('使用率') ? color : (f.score > 0 ? '#00d4a0' : f.score < 0 ? '#ff4757' : '#6b6b85');
-    div.innerHTML = `
-      <div class="factor-icon">${f.icon}</div>
-      <div class="factor-name">${f.name}</div>
-      <div class="factor-score" style="color:${scColor}">${f.name.includes('使用率') ? f.score : (f.score >= 0 ? '+' : '')+f.score}</div>
-    `;
-    fl.appendChild(div);
-  });
-
-  // 推算小字
-  const fb = document.getElementById('formulaBox');
-  fb.style.display = 'block';
-  const lateLabels = ['0次逾期 → 不扣分', '1次逾期 → −30分（myFICO）', '2–3次逾期 → −60分', '4次以上 → −88分（myFICO）'];
-  const ageLabel = ageLabels[creditAgeIdx];
-  const inqLabels = ['0次申請 → +5分', '1次申請 → 基準', '2–3次申請 → −10分', '4–5次申請 → −20分', '6次以上 → −35分'];
-  fb.innerHTML = `
-    📐 <strong style="color:#e8e8f0">推算過程（模擬參考）</strong><br>
-    使用率 ${util.toFixed(1)}% → 基礎分 ${base}${perCardPenalty > 0 ? ` − 逐卡懲罰 ${perCardPenalty}` : ''}<br>
-    還款紀錄：${lateLabels[latePayments]}<br>
-    信用年齡：${ageLabel} → ${ageScore >= 0 ? '+' : ''}${ageScore}分<br>
-    信用種類：${creditTypes.size}種 → ${typeScore >= 0 ? '+' : ''}${typeScore}分<br>
-    新申請：${inqLabels[inquiryIdx]}<br>
-    = 模擬評分 <strong style="color:${color};font-size:13px;">${total}</strong> 分
-    （美國平均 ${avgScore} 分，${total >= avgScore ? '高於平均 ✦' : `差距 ${avgScore - total} 分`}）<br>
-    <span style="opacity:0.5;font-size:10px;">※ 本工具為模擬參考，實際分數由各信用局綜合計算</span>
-  `;
-
-  return { total, util, color };
-}
-
-// ==================== 狀態（提前宣告）====================
-// ==================== 滑桿輸入同步 ====================
-function syncFromSlider() {
-  const val = +document.getElementById('simSlider').value;
-  document.getElementById('simInput').value = val;
-  updateSim();
-}
-function syncFromInput() {
-  const totalBal = cards.reduce((s,c) => s + c.balance, 0);
-  let val = +document.getElementById('simInput').value || 0;
-  val = Math.max(0, Math.min(val, totalBal));
-  document.getElementById('simSlider').value = val;
-  updateSim();
-}
-
-// ==================== 還款試算 ====================
-function updateSim() {
-  const totalBal = cards.reduce((s,c) => s + c.balance, 0);
-  const simInput = document.getElementById('simInput');
-  const simSlider = document.getElementById('simSlider');
-  const pay = simInput ? (+simInput.value || 0) : (+simSlider.value || 0);
-
-  const minPay = Math.max(100, Math.round(totalBal * 0.02));
-
-  // 判斷還款行為
-  let activeBtn;
-  if (pay >= totalBal) activeBtn = 'full';
-  else if (pay >= minPay * 3) activeBtn = 'partial';
-  else if (pay >= minPay) activeBtn = 'min';
-  else activeBtn = 'none';
-
-  const phColors = { full:'0,212,160', partial:'255,209,102', min:'255,209,102', none:'255,71,87' };
-  const phText = { full:'#00d4a0', partial:'#ffd166', min:'#ffd166', none:'#ff4757' };
-  ['full','partial','min','none'].forEach(k => {
-    const el = document.getElementById('ph-' + k);
-    if (!el) return;
-    if (k === activeBtn) {
-      el.style.borderColor = phText[k];
-      el.style.background = `rgba(${phColors[k]},0.12)`;
-      el.style.color = phText[k];
-      el.style.fontWeight = '700';
-    } else {
-      el.style.borderColor = '#2a2a38';
-      el.style.background = '#13131a';
-      el.style.color = '#6b6b85';
-      el.style.fontWeight = '500';
-    }
-  });
-
-  if (totalBal <= 0) {
-    document.getElementById('methodGrid').innerHTML = '';
-    document.getElementById('simResult').style.display = 'none';
-    return;
-  }
-
-  // pay = 0 也要顯示未繳款後果，並連動評分
-  if (pay <= 0) {
-    document.getElementById('methodGrid').innerHTML = '';
-    const res = document.getElementById('simResult');
-    res.style.display = 'block';
-    res.innerHTML = `<span style="color:#ff4757">❌ 未繳款 → 30天後通報信用局，扣 75–100 分（myFICO）<br><span style="font-size:11px;opacity:0.7">最低還款約 NT$${minPay.toLocaleString()}，建議至少繳最低還款避免逾期紀錄</span></span>`;
-
-    // 連動評分卡顯示預估扣分後分數
-    const { total } = calcScore();
-    const penalty = 88; // 取中間值
-    const newScore = Math.max(300, total - penalty);
-    const el = document.getElementById('scoreNum');
-    el.textContent = newScore;
-    el.style.color = '#ff4757';
-    const tag = document.getElementById('statusTag');
-    tag.style.display = 'inline-flex';
-    tag.className = 'status-tag bad';
-    tag.textContent = '🚨 未繳款預估';
-    const pct = ((newScore - 300) / 550) * 100;
-    document.getElementById('scoreIndicator').style.left = pct + '%';
-    document.getElementById('formulaBox').style.display = 'block';
-    document.getElementById('formulaBox').innerHTML = `
-      ⚠️ <strong style="color:#ff4757">本月未繳款預估影響</strong><br>
-      目前模擬分 ${total} → 扣除遲繳罰分 −${penalty}<br>
-      = 預估評分 <strong style="color:#ff4757;font-size:13px;">${newScore}</strong> 分<br>
-      <span style="opacity:0.5;font-size:10px;">※ 30天後通報信用局才正式影響，實際扣分因人而異（myFICO：75–100分）</span>
-    `;
-    updateTips(newScore);
-    updateLoanRateSuggestion(newScore);
-    return;
-  }
-
-  // 有還款時恢復正常評分顯示
-  updateScore();
-  updateTips();
-  const displayedScore = +document.getElementById('scoreNum').textContent;
-  if (!isNaN(displayedScore)) updateLoanRateSuggestion(displayedScore);
-
-  const isMultiCard = cards.length > 1;
-  const grid = document.getElementById('methodGrid');
-  grid.innerHTML = '';
-
-  function calcRepay(monthlyPay, _rate, balsIn, strategy) {
-    let bals = balsIn.map(b => ({...b}));
-    let months = 0, totalInterest = 0, totalPaid = 0;
-    while (months < 360) {
-      const rem = bals.reduce((s,b) => s + b.balance, 0);
-      if (rem <= 0) break;
-      let interest = 0;
-      bals.forEach(b => { const i = b.balance * b.rate; b.balance += i; interest += i; });
-      totalInterest += interest;
-      let r = monthlyPay;
-      let sorted = [...bals];
-      if (strategy === 'avalanche') sorted.sort((a,b) => b.rate - a.rate);
-      else if (strategy === 'snowball') sorted.sort((a,b) => a.balance - b.balance);
-      else if (strategy === 'util') sorted.sort((a,b) => (b.balance/b.limit) - (a.balance/a.limit));
-      let monthPaid = 0;
-      for (const b of sorted) { const p = Math.min(b.balance, r); b.balance -= p; r -= p; monthPaid += p; if (r <= 0) break; }
-      totalPaid += monthPaid;
-      months++;
-    }
-    return { months, totalInterest: Math.round(totalInterest), totalPay: Math.round(totalPaid) };
-  }
-
-  const balances = cards.map(c => ({ balance: c.balance, limit: c.limit, rate: (c.rate || 15) / 1200 }));
-
-  // 全額繳清：直接顯示
-  if (pay >= totalBal) {
-    const box = document.createElement('div');
-    box.style.cssText = 'background:#13131a;border:1px solid #00d4a0;border-radius:14px;padding:18px;';
-    box.innerHTML = `
-      <div style="font-size:14px;color:#00d4a0;font-weight:600;margin-bottom:14px;">🎉 全額繳清！</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
-          <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">還完時間</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:#00d4a0;letter-spacing:1px;">1</div>
-          <div style="font-size:11px;color:#6b6b85;">個月</div>
-        </div>
-        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
-          <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">總利息</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:#00d4a0;letter-spacing:1px;">0</div>
-          <div style="font-size:11px;color:#6b6b85;">NT$</div>
-        </div>
-        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
-          <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">總還款金額</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#e8e8f0;letter-spacing:1px;">${totalBal.toLocaleString()}</div>
-          <div style="font-size:11px;color:#6b6b85;">NT$</div>
-        </div>
-        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
-          <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">評分影響</div>
-          <div style="font-size:13px;color:#00d4a0;font-weight:600;padding-top:8px;">最大化 ✦</div>
-        </div>
-      </div>
-    `;
-    grid.appendChild(box);
-    const res = document.getElementById('simResult');
-    res.style.display = 'block';
-    res.innerHTML = `<span style="color:#00d4a0">✅ 全額繳清 → 不扣分，長期累積正面紀錄</span>`;
-    return;
-  }
-
-  if (!isMultiCard) {
-    // 單張卡：一個結果區塊
-    const r = calcRepay(pay, 0, balances, 'avalanche');
-    const box = document.createElement('div');
-    box.style.cssText = 'background:#13131a;border-radius:14px;padding:18px;';
-    box.innerHTML = `
-      <div style="font-size:13px;color:#6b6b85;margin-bottom:14px;">每月還 <strong style="color:#e8e8f0;font-size:16px;">NT$${pay.toLocaleString()}</strong> 的話：</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
-          <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">還完時間</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:#00d4a0;letter-spacing:1px;">${r.months}</div>
-          <div style="font-size:11px;color:#6b6b85;">個月</div>
-        </div>
-        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
-          <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">總利息</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:${r.totalInterest > 0 ? '#ff4757' : '#00d4a0'};letter-spacing:1px;">${r.totalInterest.toLocaleString()}</div>
-          <div style="font-size:11px;color:#6b6b85;">NT$</div>
-        </div>
-        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
-          <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">總還款金額</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#e8e8f0;letter-spacing:1px;">${r.totalPay.toLocaleString()}</div>
-          <div style="font-size:11px;color:#6b6b85;">NT$</div>
-        </div>
-        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
-          <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">每月還款</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#e8e8f0;letter-spacing:1px;">${pay.toLocaleString()}</div>
-          <div style="font-size:11px;color:#6b6b85;">NT$</div>
-        </div>
-      </div>
-    `;
-    grid.appendChild(box);
-  } else {
-    // 多張卡：雪崩 vs 雪球 vs 使用率優先
-    grid.className = 'method-grid';
-    const rv = calcRepay(pay, 0, balances, 'avalanche');
-    const rs = calcRepay(pay, 0, balances, 'snowball');
-    const ru = calcRepay(pay, 0, balances, 'util');
-    const minInterest = Math.min(rv.totalInterest, rs.totalInterest, ru.totalInterest);
-    [{name:'🏔️ 雪崩法', desc:'先還利率最高，總利息最少', r:rv, best:rv.totalInterest === minInterest},
-     {name:'❄️ 雪球法', desc:'先還金額最小，心理成就感高', r:rs, best:rs.totalInterest === minInterest},
-     {name:'📊 使用率優先', desc:'先降最高使用率，評分提升最快', r:ru, best:ru.totalInterest === minInterest}
-    ].forEach(m => {
-      const div = document.createElement('div');
-      div.className = 'method-card' + (m.best ? ' best' : '');
-      div.innerHTML = `
-        <div class="method-name">${m.name}</div>
-        <div class="method-stat">
-          還完時間：<span class="method-highlight" style="color:#00d4a0">${m.r.months} 個月</span><br>
-          總還款：<span class="method-highlight">NT$${m.r.totalPay.toLocaleString()}</span><br>
-          每月還：<span class="method-highlight">NT$${pay.toLocaleString()}</span><br>
-          利息：<span class="method-highlight" style="color:${m.r.totalInterest>0?'#ff4757':'#00d4a0'}">NT$${m.r.totalInterest.toLocaleString()}</span><br>
-          <span style="color:#6b6b85;font-size:11px;">${m.desc}</span>
-        </div>`;
-      grid.appendChild(div);
-    });
-  }
-
-  // 還款行為說明
-  const res = document.getElementById('simResult');
-  res.style.display = 'block';
-  const behaviors = {
-    full: '✅ 全額繳清 → 不扣分，長期累積正面紀錄',
-    partial: '💳 部分繳清（超過最低）→ 準時還款，不扣分，但產生循環利息',
-    min: `⚠️ 只還最低（約 NT$${minPay.toLocaleString()}）→ 準時還款，不扣分，但債務持續滾大`,
-    none: '❌ 未繳款 → 30天後通報信用局，扣 75–100 分（myFICO）'
-  };
-  res.innerHTML = `<span style="color:${phText[activeBtn]}">${behaviors[activeBtn]}</span>`;
-}
-
-// ==================== 個人信貸試算 ====================
-const loanRateByScore = [
-  { min: 780, label: '頂尖', rate: { min: 5, max: 8 } },
-  { min: 740, label: '優秀', rate: { min: 5, max: 8 } },
-  { min: 670, label: '良好', rate: { min: 8, max: 10 } },
-  { min: 580, label: '尚可', rate: { min: 10, max: 13 } },
-  { min: 450, label: '需改善', rate: { min: 13, max: 15 } },
-  { min: 300, label: '高度風險', rate: null }
-];
-
-function updateLoanRateSuggestion(score) {
-  const el = document.getElementById('loanRateText');
-  const match = loanRateByScore.find(r => score >= r.min);
-  if (!match) return;
-  if (!match.rate) {
-    el.innerHTML = `<span style="color:#ff4757">評分 ${score} 分（${match.label}）→ 申請可能被拒，建議先改善信用狀況</span>`;
-    document.getElementById('loanRate').value = 15;
-  } else {
-    el.innerHTML = `評分 <strong style="color:#7c6fff">${score}</strong> 分（${match.label}）→ 參考利率約 <strong style="color:#ffd166">${match.rate.min}%–${match.rate.max}%</strong>`;
-    // 自動帶入中間值
-    const mid = ((match.rate.min + match.rate.max) / 2).toFixed(1);
-    document.getElementById('loanRate').value = mid;
-    document.getElementById('loanMonthRate').textContent = (mid / 12).toFixed(2) + '%';
-  }
-  updateLoan();
-}
-
-function updateLoan() {
-  const amount = +document.getElementById('loanAmount').value || 0;
-  const term = +document.getElementById('loanTerm').value || 36;
-  const annualRate = +document.getElementById('loanRate').value || 8;
-  const monthRate = annualRate / 1200;
-  const salary = +document.getElementById('monthlySalary').value || 0;
-
-  document.getElementById('loanMonthRate').textContent = (annualRate / 12).toFixed(2) + '%';
-
-  if (amount <= 0) {
-    document.getElementById('loanResult').style.display = 'none';
-    return;
-  }
-
-  // 等額本息公式
-  let monthly;
-  if (monthRate === 0) {
-    monthly = amount / term;
-  } else {
-    monthly = amount * monthRate * Math.pow(1 + monthRate, term) / (Math.pow(1 + monthRate, term) - 1);
-  }
-  const totalPay = monthly * term;
-  const totalInterest = totalPay - amount;
-
-  document.getElementById('loanResult').style.display = 'block';
-  document.getElementById('loanMonthly').textContent = Math.round(monthly).toLocaleString();
-
-  // 第1個月本金利息拆分
-  const firstInterest = amount * monthRate;
-  const firstPrincipal = monthly - firstInterest;
-  document.getElementById('loanMonthPrincipal').textContent = 'NT$' + Math.round(firstPrincipal).toLocaleString();
-  document.getElementById('loanMonthInterest').textContent = 'NT$' + Math.round(firstInterest).toLocaleString();
-
-  document.getElementById('loanInterest').textContent = Math.round(totalInterest).toLocaleString();
-  document.getElementById('loanInterest').style.color = totalInterest > 0 ? '#ff4757' : '#00d4a0';
-  document.getElementById('loanTotal').textContent = Math.round(totalPay).toLocaleString();
-  document.getElementById('loanRateDisplay').textContent = annualRate;
-  document.getElementById('loanTermDisplay').textContent = term;
-
-  // 月薪22倍上限 + DTI
-  const dtiEl = document.getElementById('dtiResult');
-  const salaryRes = document.getElementById('salaryResult');
-  if (salary > 0) {
-    const maxLoan = salary * 22;
-    const dti = (monthly / salary * 100).toFixed(1);
-    const dtiColor = dti > 40 ? '#ff4757' : dti > 30 ? '#ffd166' : '#00d4a0';
-
-    salaryRes.innerHTML = `
-      最高可借：<strong style="color:#00d4a0">NT$${maxLoan.toLocaleString()}</strong><br>
-      ${amount > maxLoan ? `<span style="color:#ff4757">⚠️ 超過月薪22倍上限</span>` : `<span style="color:#00d4a0">✅ 在可借範圍內</span>`}
-    `;
-
-    dtiEl.style.display = 'block';
-    dtiEl.innerHTML = `
-      負債收入比（DTI）：每月還款 NT$${Math.round(monthly).toLocaleString()} ÷ 月薪 NT$${salary.toLocaleString()} = <strong style="color:${dtiColor}">${dti}%</strong>
-      ${dti > 40 ? '<br><span style="color:#ff4757">⚠️ DTI 超過40%，銀行核貸機率較低，建議減少借款金額或延長期數</span>' : dti > 30 ? '<br><span style="color:#ffd166">注意：DTI 偏高，還款壓力較大</span>' : '<br><span style="color:#00d4a0">✅ DTI 健康，還款壓力合理</span>'}
-    `;
-  } else {
-    salaryRes.innerHTML = '';
-    dtiEl.style.display = 'none';
-  }
-}
-
-
-function updateTips(overrideScore) {
-  const { total: baseTotal, util } = calcScore();
-  const total = overrideScore !== undefined ? overrideScore : baseTotal;
-  const tips = [];
-
-  if (latePayments > 0) {
-    tips.push({ type:'bad', icon:'🚨', text:'有逾期紀錄是影響評分最大的因素（佔35%）。即使只有1次，也可能扣30分以上。建議設定自動扣繳避免遺忘。' });
-  }
-
-  if (util > 50) {
-    tips.push({ type:'bad', icon:'💳', text:`整體使用率 ${util.toFixed(0)}%，遠超建議上限。建議優先降至30%以下，這是最快提升評分的方式。` });
-  } else if (util > 30) {
-    tips.push({ type:'warn', icon:'⚠️', text:`整體使用率 ${util.toFixed(0)}%，超過建議的30%上限。可考慮提前還款或申請提高額度。` });
-  } else {
-    tips.push({ type:'good', icon:'✅', text:`使用率 ${util.toFixed(0)}% 在健康範圍內，繼續保持！10%以下最理想。` });
-  }
-
-  if (creditTypes.size === 1) {
-    tips.push({ type:'warn', icon:'🏦', text:'目前只有信用卡一種信用產品。若有其他正常還款的貸款（如車貸），可適當提升信用種類評分。' });
-  }
-
-  if (creditAgeIdx === 0) {
-    tips.push({ type:'warn', icon:'🕐', text:'信用年齡不到1年，評分較低是正常的。保持良好習慣，時間累積是最好的解決方案。' });
-  }
-
-  if (inquiryIdx >= 3) {
-    tips.push({ type:'warn', icon:'🔍', text:'近期申請次數較多，短期密集申請是財務壓力訊號。建議暫停申請新信用產品，等影響消退（約12個月）。' });
-  }
-
-  if (total >= 740) {
-    tips.push({ type:'good', icon:'🎉', text:`評分 ${total} 分，屬於優秀等級！可申請大多數貸款並獲得最優利率，房貸、車貸核准率高。` });
-  } else if (total >= 670) {
-    const vs714 = total >= 714 ? `高於美國平均714分` : `低於美國平均714分，差距 ${714 - total} 分`;
-    tips.push({ type:'good', icon:'👍', text:`評分 ${total} 分，屬於良好等級（${vs714}）。大多數貸款申請應可通過，但未必能拿到最優利率。` });
-  } else if (total >= 580) {
-    tips.push({ type:'warn', icon:'⚠️', text:`評分 ${total} 分，屬於尚可等級，低於美國平均714分，差距 ${714 - total} 分。貸款可能通過但利率較高，建議先降低使用率或清除逾期紀錄再申請。` });
-  } else if (total >= 450) {
-    tips.push({ type:'bad', icon:'📉', text:`評分 ${total} 分，需要改善。申請貸款被拒或面臨高利率的風險很高。建議先解決逾期紀錄、降低使用率，至少3–6個月後再申請。` });
-  } else {
-    tips.push({ type:'bad', icon:'🚨', text:`評分 ${total} 分，屬於高度風險等級。建議暫緩申請任何貸款，優先修復信用：清償逾期款項、降低使用率，需要至少12個月以上的持續改善。` });
-  }
-
-  const list = document.getElementById('tipsList');
-  list.innerHTML = '';
-  tips.forEach(t => {
-    const div = document.createElement('div');
-    div.className = `tip ${t.type}`;
-    div.innerHTML = `<div class="tip-icon">${t.icon}</div><div>${t.text}</div>`;
-    list.appendChild(div);
-  });
-}
-
-// ==================== 主更新 ====================
-function updateAll() {
-  updateBreakdown();
-  updateScore();
-  updateTips();
-  // 連動貸款利率建議 — 用畫面上顯示的分數
-  const displayedScore = +document.getElementById('scoreNum').textContent;
-  if (!isNaN(displayedScore)) updateLoanRateSuggestion(displayedScore);
-
-
-  const totalBal = cards.reduce((s,c) => s + c.balance, 0);
-  const simCard = document.getElementById('simCard');
-  simCard.style.display = totalBal > 0 ? 'block' : 'none';
-
-  const slider = document.getElementById('simSlider');
-  slider.max = totalBal > 0 ? totalBal : 100000;
-  slider.step = Math.max(100, Math.floor(totalBal / 200));
-  if (+slider.value > totalBal) slider.value = 0;
-  updateSim();
-}
-
-// ==================== 初始化 ====================
-renderCards();
-selectLate(0);
-selectAge(5);
-selectInquiry(0);
-updateLoan();
-
-
-
-</script>
-
-<!-- 下載報告按鈕 -->
+<!-- 下載 -->
 <div style="text-align:center;padding:20px 0 60px;position:relative;z-index:1;">
   <a href="./專題報告_含模擬器.pdf" download style="
     display:inline-flex;align-items:center;gap:10px;
-    background:rgba(124,111,255,0.15);
-    border:1px solid rgba(124,111,255,0.4);
-    color:#7c6fff;text-decoration:none;
-    padding:14px 28px;border-radius:14px;
+    background:rgba(124,111,255,0.15); border:1px solid rgba(124,111,255,0.4);
+    color:#7c6fff;text-decoration:none; padding:14px 28px;border-radius:14px;
     font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;
     transition:all 0.25s;
   " onmouseover="this.style.background='rgba(124,111,255,0.25)'"
@@ -1304,5 +771,498 @@ updateLoan();
   </a>
 </div>
 
+<script>
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let cards       = [{ name: '卡片 1', limit: 100000, balance: 30000, rate: 15 }];
+let latePayments = 0;
+let creditAgeIdx = 5;
+let creditTypes  = new Set(['card']);
+let inquiryIdx   = 0;
+let currentStep  = 1;
+let selectedAction = null;
+
+const ageLabels  = ['不到1年','1–3年','3–7年','7–15年','15年以上','不確定（以5年估算）'];
+const ageScores  = [-45,-25,-10,0,15,-10];
+const inquiryScores = [5,0,-10,-20,-35];
+
+// ══════════════════════════════════════════
+// STEPPER
+// ══════════════════════════════════════════
+function goStep(n) {
+  if (n === 2 || n === 3) {
+    updateScore();
+    updateTips();
+    const score = calcScore().total;
+    updateLoanRateSuggestion(score);
+    updateChip(score);
+    if (n === 3) {
+      // re-run sim if action already selected
+      if (selectedAction === 'repay') updateSim();
+      if (selectedAction === 'loan')  updateLoan();
+    }
+  }
+  ['panel1','panel2','panel3'].forEach((id,i) => {
+    document.getElementById(id).classList.toggle('active', i+1 === n);
+  });
+  [1,2,3].forEach(i => {
+    const sb = document.getElementById('sb'+i);
+    const sl = document.getElementById('sl'+i);
+    sb.className = 'step-bubble ' + (i < n ? 'done' : i === n ? 'active' : '');
+    sl.className = 'step-label '  + (i < n ? 'done' : i === n ? 'active' : '');
+  });
+  [1,2].forEach(i => {
+    document.getElementById('line'+i).classList.toggle('done', i < n);
+  });
+  currentStep = n;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ══════════════════════════════════════════
+// ACTION SELECTION
+// ══════════════════════════════════════════
+function selectAction(type) {
+  selectedAction = type;
+  document.getElementById('actionRepay').classList.toggle('selected', type === 'repay');
+  document.getElementById('actionLoan').classList.toggle('selected', type === 'loan');
+
+  const repayPanel = document.getElementById('expandRepay');
+  const loanPanel  = document.getElementById('expandLoan');
+
+  if (type === 'repay') {
+    repayPanel.classList.add('open');
+    loanPanel.classList.remove('open');
+    const totalBal = cards.reduce((s,c) => s+c.balance, 0);
+    const slider = document.getElementById('simSlider');
+    slider.max = totalBal > 0 ? totalBal : 100000;
+    slider.step = Math.max(100, Math.floor(totalBal/200));
+    updateSim();
+  } else {
+    loanPanel.classList.add('open');
+    repayPanel.classList.remove('open');
+    updateLoan();
+  }
+  // smooth scroll to panel
+  setTimeout(() => {
+    const el = type === 'repay' ? repayPanel : loanPanel;
+    el.scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 100);
+}
+
+// ══════════════════════════════════════════
+// FICO COLLAPSE
+// ══════════════════════════════════════════
+function toggleFico(btn) {
+  const el = document.getElementById('ficoLinks');
+  const txt = document.getElementById('ficoToggleText');
+  el.classList.toggle('open');
+  txt.textContent = el.classList.contains('open') ? '▲ 收起' : '▼ 展開資料來源';
+}
+
+// ══════════════════════════════════════════
+// FACTOR 1: 還款紀錄
+// ══════════════════════════════════════════
+function selectLate(idx) {
+  latePayments = idx;
+  const cls = ['active-good','active-warn','active-bad','active-danger'];
+  [0,1,2,3].forEach(i => {
+    const b = document.getElementById('late-'+i);
+    b.className = 'late-btn'; if (i===idx) b.classList.add(cls[i]);
+  });
+}
+function getLateScore() { return [0,-30,-60,-88][latePayments]; }
+
+// ══════════════════════════════════════════
+// FACTOR 2: 信用卡
+// ══════════════════════════════════════════
+function renderCards() {
+  const list = document.getElementById('cardsList');
+  list.innerHTML = '';
+  cards.forEach((c,i) => {
+    const row = document.createElement('div');
+    row.className = 'credit-card-row';
+    row.innerHTML = `
+      <div><label>卡片名稱</label>
+        <input type="text" value="${c.name}" placeholder="例：玉山信用卡" oninput="cards[${i}].name=this.value">
+      </div>
+      <div class="card-fields">
+        <div><label>總額度（NT$）</label>
+          <input type="number" value="${c.limit}" placeholder="100000" style="border-color:rgba(124,111,255,0.3)" oninput="cards[${i}].limit=+this.value||0;updateBreakdown()">
+        </div>
+        <div><label>已使用（NT$）</label>
+          <input type="number" value="${c.balance}" placeholder="30000" style="border-color:rgba(255,107,157,0.3)" oninput="cards[${i}].balance=+this.value||0;updateBreakdown()">
+        </div>
+        <div><label>年循環利率（%）</label>
+          <input type="number" value="${c.rate||15}" placeholder="15" min="5" max="15" step="0.5" style="border-color:rgba(255,209,102,0.3)" oninput="let v=Math.min(Math.max(+this.value||15,0.1),15);cards[${i}].rate=v;this.nextElementSibling.querySelector('span').textContent=(v/12).toFixed(2)+'%'">
+          <div style="font-size:10px;color:#6b6b85;margin-top:4px;">月利率 ≈ <span style="color:#ffd166;font-weight:600;">${((c.rate||15)/12).toFixed(2)}%</span></div>
+        </div>
+      </div>
+      ${cards.length>1?`<button class="remove-btn" onclick="removeCard(${i})">✕ 移除此卡</button>`:''}
+    `;
+    list.appendChild(row);
+  });
+}
+function addCard() {
+  if (cards.length >= 6) return;
+  cards.push({ name:`卡片 ${cards.length+1}`, limit:50000, balance:10000, rate:15 });
+  renderCards(); updateBreakdown();
+}
+function removeCard(i) { cards.splice(i,1); renderCards(); updateBreakdown(); }
+function getTotalUtil() {
+  const lim = cards.reduce((s,c)=>s+c.limit,0);
+  const bal = cards.reduce((s,c)=>s+c.balance,0);
+  return lim>0?(bal/lim)*100:0;
+}
+function getColor(pct) {
+  if (pct<=10) return '#00d4a0'; if (pct<=30) return '#00d4a0';
+  if (pct<=50) return '#ffd166'; if (pct<=75) return '#ff8c42'; return '#ff4757';
+}
+function getUtilScore(util) {
+  if (util<=0)  return 750; if (util<=5)  return 755; if (util<=10) return 760;
+  if (util<=20) return 745; if (util<=30) return 720; if (util<=40) return 690;
+  if (util<=50) return 655; if (util<=60) return 615; if (util<=75) return 570;
+  if (util<=90) return 525; if (util<=99) return 480; return 440;
+}
+function updateBreakdown() {
+  const wrap = document.getElementById('breakdownWrap');
+  const bd   = document.getElementById('breakdown');
+  if (cards.length===0) { wrap.style.display='none'; return; }
+  wrap.style.display='block'; bd.innerHTML='';
+  cards.forEach(c=>{
+    const pct = c.limit>0?Math.min((c.balance/c.limit)*100,100):0;
+    const color = getColor(pct);
+    const row = document.createElement('div'); row.className='breakdown-row';
+    row.innerHTML=`
+      <div class="breakdown-name">${c.name}</div>
+      <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:${pct}%;background:${color}"></div></div>
+      <div class="breakdown-pct" style="color:${color}">${pct.toFixed(0)}%</div>
+    `;
+    bd.appendChild(row);
+  });
+}
+
+// ══════════════════════════════════════════
+// FACTOR 3: 信用年齡
+// ══════════════════════════════════════════
+function selectAge(idx) {
+  creditAgeIdx = idx;
+  [0,1,2,3,4,5].forEach(i=>document.getElementById('age-'+i).classList.toggle('active',i===idx));
+}
+function getAgeScore() { return ageScores[creditAgeIdx]; }
+
+// ══════════════════════════════════════════
+// FACTOR 4: 信用種類
+// ══════════════════════════════════════════
+function toggleType(el) {
+  if (el.dataset.type==='card') return;
+  el.classList.toggle('checked');
+  const check = el.querySelector('.type-check');
+  if (el.classList.contains('checked')) { creditTypes.add(el.dataset.type); check.textContent='✓'; }
+  else { creditTypes.delete(el.dataset.type); check.textContent=''; }
+}
+function getTypeScore() {
+  const n=creditTypes.size;
+  if (n<=1) return 0; if (n===2) return 10; if (n===3) return 15; return 20;
+}
+
+// ══════════════════════════════════════════
+// FACTOR 5: 新申請次數
+// ══════════════════════════════════════════
+function selectInquiry(idx) {
+  inquiryIdx=idx;
+  [0,1,2,3,4].forEach(i=>document.getElementById('inq-'+i).classList.toggle('active',i===idx));
+}
+function getInquiryScore() { return inquiryScores[inquiryIdx]; }
+
+// ══════════════════════════════════════════
+// SCORE CALC
+// ══════════════════════════════════════════
+function calcScore() {
+  const util = getTotalUtil();
+  let base = getUtilScore(util);
+  let perCardPenalty = 0;
+  cards.forEach(c=>{
+    const u=c.limit>0?(c.balance/c.limit)*100:0;
+    if(u>=100) perCardPenalty+=30; else if(u>=90) perCardPenalty+=20;
+    else if(u>=75) perCardPenalty+=10; else if(u>=50) perCardPenalty+=5;
+  });
+  const maxed=cards.filter(c=>c.limit>0&&(c.balance/c.limit)>=1).length;
+  if(maxed>=3) perCardPenalty+=30; else if(maxed>=2) perCardPenalty+=15;
+  const lateScore=getLateScore(), ageScore=getAgeScore();
+  const typeScore=getTypeScore(), inqScore=getInquiryScore();
+  const total=Math.max(300,Math.min(850,base-perCardPenalty+lateScore+ageScore+typeScore+inqScore));
+  return {total,base,perCardPenalty,lateScore,ageScore,typeScore,inqScore,util};
+}
+
+function getScoreMeta(total) {
+  if (total>=780) return { color:'#00ffcc', tagClass:'good', tagText:'✦ 頂尖' };
+  if (total>=740) return { color:'#00d4a0', tagClass:'good', tagText:'✦ 優秀' };
+  if (total>=670) return { color:'#00d4a0', tagClass:'good', tagText:'✦ 良好' };
+  if (total>=580) return { color:'#ffd166', tagClass:'warn', tagText:'⚠ 尚可' };
+  if (total>=450) return { color:'#ff8c42', tagClass:'warn', tagText:'✕ 需改善' };
+  return { color:'#ff4757', tagClass:'bad', tagText:'🚨 高度風險' };
+}
+
+function updateChip(total) {
+  const meta = getScoreMeta(total);
+  const el = document.getElementById('chipScore');
+  const tag = document.getElementById('chipTag');
+  el.textContent = total;
+  el.style.color = meta.color;
+  tag.textContent = meta.tagText;
+  tag.style.color = meta.color;
+}
+
+function updateScore() {
+  const {total,base,perCardPenalty,lateScore,ageScore,typeScore,inqScore,util}=calcScore();
+  const meta = getScoreMeta(total);
+  const el = document.getElementById('scoreNum');
+  el.textContent = total; el.style.color = meta.color;
+  const tag=document.getElementById('statusTag');
+  tag.style.display='inline-flex'; tag.className=`status-tag ${meta.tagClass}`; tag.textContent=meta.tagText;
+  const pct=((total-300)/550)*100;
+  document.getElementById('scoreBarWrap').style.display='block';
+  const ind=document.getElementById('scoreIndicator');
+  ind.style.display='block'; ind.style.left=pct+'%';
+
+  // factor list
+  const factors=[
+    {icon:'📅',name:`還款紀錄（35%）`,score:lateScore,isUtil:false},
+    {icon:'💳',name:`使用率 ${util.toFixed(1)}%（30%）`,score:base-perCardPenalty,isUtil:true},
+    {icon:'🕐',name:`信用年齡（15%）`,score:ageScore,isUtil:false},
+    {icon:'🏦',name:`信用種類 ${creditTypes.size}種（10%）`,score:typeScore,isUtil:false},
+    {icon:'🔍',name:`新申請次數（10%）`,score:inqScore,isUtil:false},
+  ];
+  const fl=document.getElementById('factorList'); fl.innerHTML='';
+  factors.forEach(f=>{
+    const scColor=f.isUtil?meta.color:(f.score>0?'#00d4a0':f.score<0?'#ff4757':'#6b6b85');
+    const div=document.createElement('div'); div.className='factor-row';
+    div.innerHTML=`
+      <div class="factor-icon">${f.icon}</div>
+      <div class="factor-name">${f.name}</div>
+      <div class="factor-score" style="color:${scColor}">${f.isUtil?f.score:(f.score>=0?'+':'')+f.score}</div>
+    `;
+    fl.appendChild(div);
+  });
+
+  // formula
+  const lateLabels=['0次逾期 → 不扣分','1次逾期 → −30分（myFICO）','2–3次逾期 → −60分','4次以上 → −88分（myFICO）'];
+  const inqLabels=['0次申請 → +5分','1次申請 → 基準','2–3次申請 → −10分','4–5次申請 → −20分','6次以上 → −35分'];
+  const fb=document.getElementById('formulaBox');
+  fb.style.display='block';
+  fb.innerHTML=`
+    📐 <strong style="color:#e8e8f0">推算過程（模擬參考）</strong><br>
+    使用率 ${util.toFixed(1)}% → 基礎分 ${base}${perCardPenalty>0?` − 逐卡懲罰 ${perCardPenalty}`:''}<br>
+    還款紀錄：${lateLabels[latePayments]}<br>
+    信用年齡：${ageLabels[creditAgeIdx]} → ${ageScore>=0?'+':''}${ageScore}分<br>
+    信用種類：${creditTypes.size}種 → ${typeScore>=0?'+':''}${typeScore}分<br>
+    新申請：${inqLabels[inquiryIdx]}<br>
+    = 模擬評分 <strong style="color:${meta.color};font-size:13px;">${total}</strong> 分
+    （美國平均 714 分，${total>=714?'高於平均 ✦':`差距 ${714-total} 分`}）<br>
+    <span style="opacity:0.5;font-size:10px;">※ 本工具為模擬參考，實際分數由各信用局綜合計算</span>
+  `;
+  return {total,util,meta};
+}
+
+// ══════════════════════════════════════════
+// TIPS
+// ══════════════════════════════════════════
+function updateTips(overrideScore) {
+  const {total:baseTotal,util}=calcScore();
+  const total=overrideScore!==undefined?overrideScore:baseTotal;
+  const tips=[];
+  if (latePayments>0) tips.push({type:'bad',icon:'🚨',text:'有逾期紀錄是影響評分最大的因素（佔35%）。建議設定自動扣繳避免遺忘。'});
+  if (util>50) tips.push({type:'bad',icon:'💳',text:`整體使用率 ${util.toFixed(0)}%，遠超建議上限。優先降至30%以下是最快提升評分的方式。`});
+  else if (util>30) tips.push({type:'warn',icon:'⚠️',text:`整體使用率 ${util.toFixed(0)}%，超過建議的30%上限。可考慮提前還款或申請提高額度。`});
+  else tips.push({type:'good',icon:'✅',text:`使用率 ${util.toFixed(0)}% 在健康範圍內，繼續保持！`});
+  if (creditTypes.size===1) tips.push({type:'warn',icon:'🏦',text:'目前只有信用卡一種信用產品。若有其他正常還款的貸款，可適當提升信用種類評分。'});
+  if (creditAgeIdx===0) tips.push({type:'warn',icon:'🕐',text:'信用年齡不到1年，評分較低是正常的。保持良好習慣，時間是最好的解決方案。'});
+  if (inquiryIdx>=3) tips.push({type:'warn',icon:'🔍',text:'近期申請次數較多。建議暫停申請，等影響消退（約12個月）。'});
+  if (total>=740) tips.push({type:'good',icon:'🎉',text:`評分 ${total} 分（優秀）！可申請大多數貸款並獲得最優利率。`});
+  else if (total>=670) tips.push({type:'good',icon:'👍',text:`評分 ${total} 分（良好）。大多數貸款申請應可通過。`});
+  else if (total>=580) tips.push({type:'warn',icon:'⚠️',text:`評分 ${total} 分（尚可），低於美國平均714分。貸款可能通過但利率較高。`});
+  else tips.push({type:'bad',icon:'📉',text:`評分 ${total} 分，需要改善。建議先降低使用率並清除逾期紀錄。`});
+  const list=document.getElementById('tipsList'); list.innerHTML='';
+  tips.forEach(t=>{
+    const d=document.createElement('div'); d.className=`tip ${t.type}`;
+    d.innerHTML=`<div class="tip-icon">${t.icon}</div><div>${t.text}</div>`;
+    list.appendChild(d);
+  });
+}
+
+// ══════════════════════════════════════════
+// 還款試算
+// ══════════════════════════════════════════
+function syncFromSlider() {
+  const val=+document.getElementById('simSlider').value;
+  document.getElementById('simInput').value=val; updateSim();
+}
+function syncFromInput() {
+  const totalBal=cards.reduce((s,c)=>s+c.balance,0);
+  let val=+document.getElementById('simInput').value||0;
+  val=Math.max(0,Math.min(val,totalBal));
+  document.getElementById('simSlider').value=val; updateSim();
+}
+function updateSim() {
+  const totalBal=cards.reduce((s,c)=>s+c.balance,0);
+  const pay=+document.getElementById('simInput').value||0;
+  const minPay=Math.max(100,Math.round(totalBal*0.02));
+  let activeBtn;
+  if(pay>=totalBal) activeBtn='full';
+  else if(pay>=minPay*3) activeBtn='partial';
+  else if(pay>=minPay) activeBtn='min';
+  else activeBtn='none';
+  const phColors={full:'0,212,160',partial:'255,209,102',min:'255,209,102',none:'255,71,87'};
+  const phText={full:'#00d4a0',partial:'#ffd166',min:'#ffd166',none:'#ff4757'};
+  ['full','partial','min','none'].forEach(k=>{
+    const el=document.getElementById('ph-'+k); if(!el) return;
+    if(k===activeBtn){el.style.borderColor=phText[k];el.style.background=`rgba(${phColors[k]},0.12)`;el.style.color=phText[k];el.style.fontWeight='700';}
+    else{el.style.borderColor='#2a2a38';el.style.background='#13131a';el.style.color='#6b6b85';el.style.fontWeight='500';}
+  });
+  if(totalBal<=0){document.getElementById('methodGrid').innerHTML='';document.getElementById('simResult').style.display='none';return;}
+  if(pay<=0){
+    document.getElementById('methodGrid').innerHTML='';
+    const res=document.getElementById('simResult');
+    res.style.display='block';
+    res.innerHTML=`<span style="color:#ff4757">❌ 未繳款 → 30天後通報信用局，扣 75–100 分（myFICO）<br><span style="font-size:11px;opacity:0.7">最低還款約 NT$${minPay.toLocaleString()}，建議至少繳最低還款</span></span>`;
+    return;
+  }
+  function calcRepay(monthlyPay,balsIn,strategy){
+    let bals=balsIn.map(b=>({...b})); let months=0,totalInterest=0,totalPaid=0;
+    while(months<360){
+      const rem=bals.reduce((s,b)=>s+b.balance,0); if(rem<=0) break;
+      let interest=0;
+      bals.forEach(b=>{const i=b.balance*b.rate;b.balance+=i;interest+=i;}); totalInterest+=interest;
+      let r=monthlyPay;
+      let sorted=[...bals];
+      if(strategy==='avalanche') sorted.sort((a,b)=>b.rate-a.rate);
+      else if(strategy==='snowball') sorted.sort((a,b)=>a.balance-b.balance);
+      else if(strategy==='util') sorted.sort((a,b)=>(b.balance/b.limit)-(a.balance/a.limit));
+      let monthPaid=0;
+      for(const b of sorted){const p=Math.min(b.balance,r);b.balance-=p;r-=p;monthPaid+=p;if(r<=0)break;}
+      totalPaid+=monthPaid; months++;
+    }
+    return{months,totalInterest:Math.round(totalInterest),totalPay:Math.round(totalPaid)};
+  }
+  const balances=cards.map(c=>({balance:c.balance,limit:c.limit,rate:(c.rate||15)/1200}));
+  const grid=document.getElementById('methodGrid'); grid.innerHTML='';
+  if(pay>=totalBal){
+    const box=document.createElement('div');
+    box.style.cssText='background:#13131a;border:1px solid #00d4a0;border-radius:14px;padding:18px;';
+    box.innerHTML=`<div style="font-size:14px;color:#00d4a0;font-weight:600;margin-bottom:14px;">🎉 全額繳清！</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;"><div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">還完時間</div><div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:#00d4a0;">1</div><div style="font-size:11px;color:#6b6b85;">個月</div></div>
+        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;"><div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">總利息</div><div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:#00d4a0;">0</div><div style="font-size:11px;color:#6b6b85;">NT$</div></div>
+        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;"><div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">總還款金額</div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#e8e8f0;">${totalBal.toLocaleString()}</div><div style="font-size:11px;color:#6b6b85;">NT$</div></div>
+        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;"><div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">評分影響</div><div style="font-size:13px;color:#00d4a0;font-weight:600;padding-top:8px;">最大化 ✦</div></div>
+      </div>`;
+    grid.appendChild(box);
+    document.getElementById('simResult').style.display='block';
+    document.getElementById('simResult').innerHTML=`<span style="color:#00d4a0">✅ 全額繳清 → 不扣分，長期累積正面紀錄</span>`;
+    return;
+  }
+  const isMulti=cards.length>1;
+  if(!isMulti){
+    const r=calcRepay(pay,balances,'avalanche');
+    const box=document.createElement('div'); box.style.cssText='background:#13131a;border-radius:14px;padding:18px;';
+    box.innerHTML=`<div style="font-size:13px;color:#6b6b85;margin-bottom:14px;">每月還 <strong style="color:#e8e8f0;font-size:16px;">NT$${pay.toLocaleString()}</strong> 的話：</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;"><div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">還完時間</div><div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:#00d4a0;">${r.months}</div><div style="font-size:11px;color:#6b6b85;">個月</div></div>
+        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;"><div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">總利息</div><div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:${r.totalInterest>0?'#ff4757':'#00d4a0'};">${r.totalInterest.toLocaleString()}</div><div style="font-size:11px;color:#6b6b85;">NT$</div></div>
+        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;"><div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">總還款金額</div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#e8e8f0;">${r.totalPay.toLocaleString()}</div><div style="font-size:11px;color:#6b6b85;">NT$</div></div>
+        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;"><div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">每月還款</div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#e8e8f0;">${pay.toLocaleString()}</div><div style="font-size:11px;color:#6b6b85;">NT$</div></div>
+      </div>`;
+    grid.appendChild(box);
+  } else {
+    grid.className='method-grid';
+    const rv=calcRepay(pay,balances,'avalanche');
+    const rs=calcRepay(pay,balances,'snowball');
+    const ru=calcRepay(pay,balances,'util');
+    const minInt=Math.min(rv.totalInterest,rs.totalInterest,ru.totalInterest);
+    [{name:'🏔️ 雪崩法',desc:'先還利率最高，總利息最少',r:rv,best:rv.totalInterest===minInt},
+     {name:'❄️ 雪球法',desc:'先還金額最小，心理成就感高',r:rs,best:rs.totalInterest===minInt},
+     {name:'📊 使用率優先',desc:'先降最高使用率，評分提升最快',r:ru,best:ru.totalInterest===minInt}
+    ].forEach(m=>{
+      const div=document.createElement('div');
+      div.className='method-card'+(m.best?' best':'');
+      div.innerHTML=`<div class="method-name">${m.name}</div><div class="method-stat">
+        還完時間：<span class="method-highlight" style="color:#00d4a0">${m.r.months} 個月</span><br>
+        總還款：<span class="method-highlight">NT$${m.r.totalPay.toLocaleString()}</span><br>
+        每月還：<span class="method-highlight">NT$${pay.toLocaleString()}</span><br>
+        利息：<span class="method-highlight" style="color:${m.r.totalInterest>0?'#ff4757':'#00d4a0'}">NT$${m.r.totalInterest.toLocaleString()}</span><br>
+        <span style="color:#6b6b85;font-size:11px;">${m.desc}</span></div>`;
+      grid.appendChild(div);
+    });
+  }
+  const behaviors={full:'✅ 全額繳清 → 不扣分，長期累積正面紀錄',partial:'💳 部分繳清（超過最低）→ 準時還款，不扣分，但產生循環利息',min:`⚠️ 只還最低（約 NT$${minPay.toLocaleString()}）→ 準時還款，不扣分，但債務持續滾大`,none:'❌ 未繳款 → 30天後通報信用局，扣 75–100 分（myFICO）'};
+  const res=document.getElementById('simResult');
+  res.style.display='block'; res.innerHTML=`<span style="color:${phText[activeBtn]}">${behaviors[activeBtn]}</span>`;
+}
+
+// ══════════════════════════════════════════
+// 個人信貸試算
+// ══════════════════════════════════════════
+const loanRateByScore=[
+  {min:780,label:'頂尖',rate:{min:5,max:8}},
+  {min:740,label:'優秀',rate:{min:5,max:8}},
+  {min:670,label:'良好',rate:{min:8,max:10}},
+  {min:580,label:'尚可',rate:{min:10,max:13}},
+  {min:450,label:'需改善',rate:{min:13,max:15}},
+  {min:300,label:'高度風險',rate:null}
+];
+
+function updateLoanRateSuggestion(score) {
+  const el=document.getElementById('loanRateText');
+  const match=loanRateByScore.find(r=>score>=r.min);
+  if(!match) return;
+  if(!match.rate){
+    el.innerHTML=`<span style="color:#ff4757">評分 ${score} 分（${match.label}）→ 申請可能被拒，建議先改善信用狀況</span>`;
+    document.getElementById('loanRate').value=15;
+  } else {
+    el.innerHTML=`評分 <strong style="color:#7c6fff">${score}</strong> 分（${match.label}）→ 參考利率約 <strong style="color:#ffd166">${match.rate.min}%–${match.rate.max}%</strong>`;
+    const mid=((match.rate.min+match.rate.max)/2).toFixed(1);
+    document.getElementById('loanRate').value=mid;
+    document.getElementById('loanMonthRate').textContent=(mid/12).toFixed(2)+'%';
+  }
+  updateLoan();
+}
+
+function updateLoan() {
+  const amount=+document.getElementById('loanAmount').value||0;
+  const term=+document.getElementById('loanTerm').value||36;
+  const annualRate=+document.getElementById('loanRate').value||8;
+  const monthRate=annualRate/1200;
+  const salary=+document.getElementById('monthlySalary').value||0;
+  document.getElementById('loanMonthRate').textContent=(annualRate/12).toFixed(2)+'%';
+  if(amount<=0){document.getElementById('loanResult').style.display='none';return;}
+  let monthly=monthRate===0?amount/term:amount*monthRate*Math.pow(1+monthRate,term)/(Math.pow(1+monthRate,term)-1);
+  const totalPay=monthly*term, totalInterest=totalPay-amount;
+  document.getElementById('loanResult').style.display='block';
+  document.getElementById('loanMonthly').textContent=Math.round(monthly).toLocaleString();
+  const fi=amount*monthRate, fp=monthly-fi;
+  document.getElementById('loanMonthPrincipal').textContent='NT$'+Math.round(fp).toLocaleString();
+  document.getElementById('loanMonthInterest').textContent='NT$'+Math.round(fi).toLocaleString();
+  document.getElementById('loanInterest').textContent=Math.round(totalInterest).toLocaleString();
+  document.getElementById('loanInterest').style.color=totalInterest>0?'#ff4757':'#00d4a0';
+  document.getElementById('loanTotal').textContent=Math.round(totalPay).toLocaleString();
+  document.getElementById('loanRateDisplay').textContent=annualRate;
+  document.getElementById('loanTermDisplay').textContent=term;
+  const dtiEl=document.getElementById('dtiResult'), salaryRes=document.getElementById('salaryResult');
+  if(salary>0){
+    const maxLoan=salary*22, dti=(monthly/salary*100).toFixed(1);
+    const dtiColor=dti>40?'#ff4757':dti>30?'#ffd166':'#00d4a0';
+    salaryRes.innerHTML=`最高可借：<strong style="color:#00d4a0">NT$${maxLoan.toLocaleString()}</strong><br>${amount>maxLoan?'<span style="color:#ff4757">⚠️ 超過月薪22倍上限</span>':'<span style="color:#00d4a0">✅ 在可借範圍內</span>'}`;
+    dtiEl.style.display='block';
+    dtiEl.innerHTML=`負債收入比（DTI）：NT$${Math.round(monthly).toLocaleString()} ÷ NT$${salary.toLocaleString()} = <strong style="color:${dtiColor}">${dti}%</strong>${dti>40?'<br><span style="color:#ff4757">⚠️ DTI 超過40%，銀行核貸機率較低</span>':dti>30?'<br><span style="color:#ffd166">注意：DTI 偏高</span>':'<br><span style="color:#00d4a0">✅ DTI 健康，還款壓力合理</span>'}`;
+  } else { salaryRes.innerHTML=''; dtiEl.style.display='none'; }
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+renderCards();
+updateBreakdown();
+</script>
 </body>
 </html>

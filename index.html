@@ -12,6 +12,10 @@
     --border: #2a2a38; --accent: #7c6fff; --green: #00d4a0;
     --yellow: #ffd166; --red: #ff4757; --orange: #ff8c42;
     --text: #e8e8f0; --muted: #6b6b85;
+    --score-up: #00d4a0; --score-down: #ff4757;
+  }
+  body.tw-mode {
+    --score-up: #ff4757; --score-down: #00d4a0;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -237,15 +241,20 @@
   }
   .score-bar-track {
     height: 100%; border-radius: 10px;
-    background: linear-gradient(90deg, #ff4757 0%, #ffd166 40%, #00d4a0 80%);
+    background: linear-gradient(90deg, var(--score-down) 0%, #ffd166 40%, var(--score-up) 80%);
     opacity: 0.5;
   }
   .score-bar-indicator {
-    position: absolute; top: -4px; width: 18px; height: 18px;
-    border-radius: 50%; background: white;
-    box-shadow: 0 0 12px rgba(255,255,255,0.8);
+    position: absolute; top: -18px;
+    width: 0; height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 10px solid white;
+    filter: drop-shadow(0 0 4px rgba(255,255,255,0.7));
     transform: translateX(-50%);
     transition: left 0.6s cubic-bezier(0.34,1.56,0.64,1);
+    background: transparent;
+    border-radius: 0;
   }
   .zone-pills { display: flex; gap: 4px; margin-top: 10px; }
   .zone-pill {
@@ -396,7 +405,7 @@
   .action-btn.loan:not(.selected):hover { animation: pulse 1.5s infinite; }
 </style>
 </head>
-<body>
+<body class="tw-mode">
 <div class="container">
 
   <!-- HEADER -->
@@ -404,6 +413,13 @@
     <div class="badge">信用風險模擬器 v3</div>
     <h1>信用評分<br>模擬工具</h1>
     <p class="subtitle">三步驟了解你的信用狀況｜本工具為模擬參考，非真實 FICO 計算</p>
+    <div style="margin-top:16px;display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 10px;">
+      <span style="font-size:11px;color:var(--muted);">漲跌配色</span>
+      <div id="colorToggle" onclick="toggleColorMode()" style="display:flex;gap:4px;cursor:pointer;">
+        <div id="modeUS" style="padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600;background:transparent;color:var(--muted);border:1px solid transparent;transition:all 0.2s;">🇺🇸 綠漲紅跌</div>
+        <div id="modeTW" style="padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600;background:rgba(255,71,87,0.15);color:#ff4757;border:1px solid rgba(255,71,87,0.3);transition:all 0.2s;">🇹🇼 紅漲綠跌</div>
+      </div>
+    </div>
   </header>
 
   <!-- STEPPER -->
@@ -552,11 +568,11 @@
       </div>
       <label>過去12個月申請幾次信用產品？</label>
       <div class="inquiry-selector">
-        <div class="inq-btn active" id="inq-0" onclick="selectInquiry(0)">0次<br><small>+5分</small></div>
-        <div class="inq-btn" id="inq-1" onclick="selectInquiry(1)">1次<br><small>基準 0分</small></div>
-        <div class="inq-btn" id="inq-2" onclick="selectInquiry(2)">2–3次<br><small>−10分</small></div>
-        <div class="inq-btn" id="inq-3" onclick="selectInquiry(3)">4–5次<br><small>−20分</small></div>
-        <div class="inq-btn" id="inq-4" onclick="selectInquiry(4)">6次以上<br><small>−35分</small></div>
+        <div class="inq-btn active" id="inq-0" onclick="selectInquiry(0)">0次<br><small id="inq-label-0">+5分</small></div>
+        <div class="inq-btn" id="inq-1" onclick="selectInquiry(1)">1次<br><small style="color:#6b6b85">基準 0分</small></div>
+        <div class="inq-btn" id="inq-2" onclick="selectInquiry(2)">2–3次<br><small id="inq-label-2">−10分</small></div>
+        <div class="inq-btn" id="inq-3" onclick="selectInquiry(3)">4–5次<br><small id="inq-label-3">−20分</small></div>
+        <div class="inq-btn" id="inq-4" onclick="selectInquiry(4)">6次以上<br><small id="inq-label-4">−35分</small></div>
       </div>
     </div>
 
@@ -582,12 +598,12 @@
             <div class="score-bar-track"></div>
             <div class="score-bar-indicator" id="scoreIndicator" style="left:50%"></div>
           </div>
-          <div class="zone-pills">
-            <span class="zone-pill" style="color:#ff4757">極差<small>300</small></span>
+          <div class="zone-pills" id="zonePills2">
+            <span class="zone-pill" id="zp2-0">極差<small>300</small></span>
             <span class="zone-pill" style="color:#ff8c42">尚可<small>580</small></span>
             <span class="zone-pill" style="color:#ffd166">良好<small>670</small></span>
-            <span class="zone-pill" style="color:#00d4a0">優秀<small>740</small></span>
-            <span class="zone-pill" style="color:#00ffcc">頂尖<small>850</small></span>
+            <span class="zone-pill" id="zp2-3">優秀<small>740</small></span>
+            <span class="zone-pill" id="zp2-4">頂尖<small>850</small></span>
           </div>
         </div>
         <div class="factor-list" id="factorList"></div>
@@ -626,12 +642,12 @@
         <div class="score-bar-track"></div>
         <div class="score-bar-indicator" id="scoreIndicator3" style="left:50%"></div>
       </div>
-      <div class="zone-pills">
-        <span class="zone-pill" style="color:#ff4757">極差<small>300</small></span>
+      <div class="zone-pills" id="zonePills3">
+        <span class="zone-pill" id="zp3-0">極差<small>300</small></span>
         <span class="zone-pill" style="color:#ff8c42">尚可<small>580</small></span>
         <span class="zone-pill" style="color:#ffd166">良好<small>670</small></span>
-        <span class="zone-pill" style="color:#00d4a0">優秀<small>740</small></span>
-        <span class="zone-pill" style="color:#00ffcc">頂尖<small>850</small></span>
+        <span class="zone-pill" id="zp3-3">優秀<small>740</small></span>
+        <span class="zone-pill" id="zp3-4">頂尖<small>850</small></span>
       </div>
       <div class="factor-list" id="factorList3" style="margin-top:16px;"></div>
       <div id="scoreImpact3" style="margin-top:12px;display:none;"></div>
@@ -786,6 +802,62 @@
 </div>
 
 <script>
+// ══════════════════════════════════════════
+// COLOR MODE
+// ══════════════════════════════════════════
+let isTWMode = true;
+
+function toggleColorMode() {
+  isTWMode = !isTWMode;
+  document.body.classList.toggle('tw-mode', isTWMode);
+  document.getElementById('modeUS').style.background  = isTWMode ? 'transparent' : 'rgba(0,212,160,0.15)';
+  document.getElementById('modeUS').style.color       = isTWMode ? 'var(--muted)' : '#00d4a0';
+  document.getElementById('modeUS').style.borderColor = isTWMode ? 'transparent' : 'rgba(0,212,160,0.3)';
+  document.getElementById('modeTW').style.background  = isTWMode ? 'rgba(255,71,87,0.15)' : 'transparent';
+  document.getElementById('modeTW').style.color       = isTWMode ? '#ff4757' : 'var(--muted)';
+  document.getElementById('modeTW').style.borderColor = isTWMode ? 'rgba(255,71,87,0.3)' : 'transparent';
+  // 重新渲染評分
+  updateZonePills();
+updateScoreLabels();
+  updateScoreLabels();
+  updateScore(); updateTips();
+  const s = calcScore().total; updateLoanRateSuggestion(s);
+}
+
+function upColor()   { return isTWMode ? '#ff4757' : '#00d4a0'; }
+function upColorBright() { return isTWMode ? '#ff6b7a' : '#00ffcc'; }
+function downColor() { return isTWMode ? '#00d4a0' : '#ff4757'; }
+
+function updateScoreLabels() {
+  // 申請次數：+5綠/正, -10/-20/-35紅/負
+  const lbl0 = document.getElementById('inq-label-0');
+  const lbl2 = document.getElementById('inq-label-2');
+  const lbl3 = document.getElementById('inq-label-3');
+  const lbl4 = document.getElementById('inq-label-4');
+  if (lbl0) lbl0.style.color = upColor();
+  if (lbl2) lbl2.style.color = downColor();
+  if (lbl3) lbl3.style.color = downColor();
+  if (lbl4) lbl4.style.color = downColor();
+}
+
+function updateZonePills() {
+  const bad  = downColor();
+  const best = upColorBright();
+  const good = upColor();
+  // Step 2
+  const z2_0 = document.getElementById('zp2-0'); if(z2_0) z2_0.style.color = bad;
+  const z2_3 = document.getElementById('zp2-3'); if(z2_3) z2_3.style.color = good;
+  const z2_4 = document.getElementById('zp2-4'); if(z2_4) z2_4.style.color = best;
+  // Step 3
+  const z3_0 = document.getElementById('zp3-0'); if(z3_0) z3_0.style.color = bad;
+  const z3_3 = document.getElementById('zp3-3'); if(z3_3) z3_3.style.color = good;
+  const z3_4 = document.getElementById('zp3-4'); if(z3_4) z3_4.style.color = best;
+  // Score bar gradient
+  document.querySelectorAll('.score-bar-track').forEach(el => {
+    el.style.background = `linear-gradient(90deg, ${bad} 0%, #ffd166 40%, ${good} 80%)`;
+  });
+}
+
 // ══════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════
@@ -1005,12 +1077,14 @@ function calcScore() {
 }
 
 function getScoreMeta(total) {
-  if (total>=780) return { color:'#00ffcc', tagClass:'good', tagText:'✦ 頂尖' };
-  if (total>=740) return { color:'#00d4a0', tagClass:'good', tagText:'✦ 優秀' };
-  if (total>=670) return { color:'#00d4a0', tagClass:'good', tagText:'✦ 良好' };
-  if (total>=580) return { color:'#ffd166', tagClass:'warn', tagText:'⚠ 尚可' };
-  if (total>=450) return { color:'#ff8c42', tagClass:'warn', tagText:'✕ 需改善' };
-  return { color:'#ff4757', tagClass:'bad', tagText:'🚨 高度風險' };
+  const up   = upColor();
+  const down = downColor();
+  if (total>=780) return { color: up,      tagClass:'good', tagText:'✦ 頂尖' };
+  if (total>=740) return { color: up,      tagClass:'good', tagText:'✦ 優秀' };
+  if (total>=670) return { color: up,      tagClass:'good', tagText:'✦ 良好' };
+  if (total>=580) return { color:'#ffd166',tagClass:'warn', tagText:'⚠ 尚可' };
+  if (total>=450) return { color:'#ff8c42',tagClass:'warn', tagText:'✕ 需改善' };
+  return { color: down, tagClass:'bad', tagText:'🚨 高度風險' };
 }
 
 function updateChip(total, impactHtml) {
@@ -1051,7 +1125,7 @@ function updateScore() {
   ];
   const fl=document.getElementById('factorList'); fl.innerHTML='';
   factors.forEach(f=>{
-    const scColor=f.isUtil?meta.color:(f.score>0?'#00d4a0':f.score<0?'#ff4757':'#6b6b85');
+    const scColor=f.isUtil?meta.color:(f.score>0?upColor():f.score<0?downColor():'#6b6b85');
     const div=document.createElement('div'); div.className='factor-row';
     div.innerHTML=`
       <div class="factor-icon">${f.icon}</div>
@@ -1134,7 +1208,7 @@ function updateSim() {
   else if(pay>=minPay) activeBtn='min';
   else activeBtn='none';
   const phColors={full:'0,212,160',partial:'255,209,102',min:'255,209,102',none:'255,71,87'};
-  const phText={full:'#00d4a0',partial:'#ffd166',min:'#ffd166',none:'#ff4757'};
+  const phText={full:upColor(),partial:'#ffd166',min:'#ffd166',none:downColor()};
   ['full','partial','min','none'].forEach(k=>{
     const el=document.getElementById('ph-'+k); if(!el) return;
     if(k===activeBtn){el.style.borderColor=phText[k];el.style.background=`rgba(${phColors[k]},0.12)`;el.style.color=phText[k];el.style.fontWeight='700';}
@@ -1206,7 +1280,7 @@ function updateSim() {
   const currentScore = calcScore().total;
   const { score: projScore, util: projUtil } = calcProjectedScore(pay);
   const scoreDelta = projScore - currentScore;
-  const deltaColor = scoreDelta > 0 ? '#00d4a0' : scoreDelta < 0 ? '#ff4757' : '#6b6b85';
+  const deltaColor = scoreDelta > 0 ? upColor() : scoreDelta < 0 ? downColor() : '#6b6b85';
   const deltaSign  = scoreDelta > 0 ? '+' : '';
 
   // 更新 Step 2 & Step 3 評分（含衝擊說明）
@@ -1381,6 +1455,8 @@ function updateLoan() {
 // ══════════════════════════════════════════
 renderCards();
 updateBreakdown();
+updateZonePills();
+updateScoreLabels();
 </script>
 </body>
 </html>

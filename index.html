@@ -638,7 +638,7 @@
     </div>
 
     <!-- 行動選擇 -->
-    <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">你現在想做什麼？</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">你現在想做什麼？<span style="font-size:11px;opacity:0.6">（可同時展開）</span></div>
     <div class="action-grid">
       <div class="action-btn repay" id="actionRepay" onclick="selectAction('repay')">
         <div class="action-check">✓</div>
@@ -836,31 +836,27 @@ function goStep(n) {
 // ACTION SELECTION
 // ══════════════════════════════════════════
 function selectAction(type) {
-  selectedAction = type;
-  document.getElementById('actionRepay').classList.toggle('selected', type === 'repay');
-  document.getElementById('actionLoan').classList.toggle('selected', type === 'loan');
+  // 切換式：點已選的會收起，兩個可以同時展開
+  const btn = document.getElementById(type === 'repay' ? 'actionRepay' : 'actionLoan');
+  const panel = document.getElementById(type === 'repay' ? 'expandRepay' : 'expandLoan');
+  const isOpen = panel.classList.contains('open');
 
-  const repayPanel = document.getElementById('expandRepay');
-  const loanPanel  = document.getElementById('expandLoan');
+  btn.classList.toggle('selected', !isOpen);
+  panel.classList.toggle('open', !isOpen);
 
-  if (type === 'repay') {
-    repayPanel.classList.add('open');
-    loanPanel.classList.remove('open');
-    const totalBal = cards.reduce((s,c) => s+c.balance, 0);
-    const slider = document.getElementById('simSlider');
-    slider.max = totalBal > 0 ? totalBal : 100000;
-    slider.step = Math.max(100, Math.floor(totalBal/200));
-    updateSim();
-  } else {
-    loanPanel.classList.add('open');
-    repayPanel.classList.remove('open');
-    updateLoan();
+  if (!isOpen) {
+    if (type === 'repay') {
+      const totalBal = cards.reduce((s,c) => s+c.balance, 0);
+      const slider = document.getElementById('simSlider');
+      slider.max = totalBal > 0 ? totalBal : 100000;
+      slider.step = Math.max(100, Math.floor(totalBal/200));
+      updateSim();
+    } else {
+      updateLoan();
+    }
+    setTimeout(() => panel.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
   }
-  // smooth scroll to panel
-  setTimeout(() => {
-    const el = type === 'repay' ? repayPanel : loanPanel;
-    el.scrollIntoView({ behavior:'smooth', block:'start' });
-  }, 100);
+  selectedAction = type;
 }
 
 // ══════════════════════════════════════════

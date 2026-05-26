@@ -687,6 +687,18 @@
 
         <div class="sim-label"><span>這個月還款金額</span></div>
         <input type="range" id="simSlider" min="0" max="100000" step="100" value="0" oninput="syncFromSlider()">
+        <!-- 快速帶入按鈕 -->
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+          <button onclick="fillAmount('min')" style="flex:1;padding:8px 6px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(255,209,102,0.35);background:rgba(255,209,102,0.08);color:#ffd166;font-family:'DM Sans',sans-serif;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,209,102,0.18)'" onmouseout="this.style.background='rgba(255,209,102,0.08)'">
+            ⚡ 最低還款<br><span id="minPayLabel" style="font-size:10px;font-weight:400;opacity:0.8;">NT$ —</span>
+          </button>
+          <button onclick="fillAmount('half')" style="flex:1;padding:8px 6px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(124,111,255,0.35);background:rgba(124,111,255,0.08);color:#7c6fff;font-family:'DM Sans',sans-serif;transition:all 0.2s;" onmouseover="this.style.background='rgba(124,111,255,0.18)'" onmouseout="this.style.background='rgba(124,111,255,0.08)'">
+            💡 還一半<br><span id="halfPayLabel" style="font-size:10px;font-weight:400;opacity:0.8;">NT$ —</span>
+          </button>
+          <button onclick="fillAmount('full')" style="flex:1;padding:8px 6px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(0,212,160,0.35);background:rgba(0,212,160,0.08);color:#00d4a0;font-family:'DM Sans',sans-serif;transition:all 0.2s;" onmouseover="this.style.background='rgba(0,212,160,0.18)'" onmouseout="this.style.background='rgba(0,212,160,0.08)'">
+            ✅ 全額繳清<br><span id="fullPayLabel" style="font-size:10px;font-weight:400;opacity:0.8;">NT$ —</span>
+          </button>
+        </div>
         <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div>
             <label>還款金額（NT$）</label>
@@ -1188,6 +1200,29 @@ function updateTips(overrideScore) {
 // ══════════════════════════════════════════
 // 還款試算
 // ══════════════════════════════════════════
+function fillAmount(type) {
+  const totalBal = cards.reduce((s,c) => s+c.balance, 0);
+  const minPay = Math.max(100, Math.round(totalBal * 0.02));
+  let val = 0;
+  if (type === 'min')  val = minPay;
+  if (type === 'half') val = Math.round(totalBal / 2);
+  if (type === 'full') val = totalBal;
+  document.getElementById('simInput').value = val;
+  document.getElementById('simSlider').value = val;
+  updateSim();
+}
+
+function updatePayLabels() {
+  const totalBal = cards.reduce((s,c) => s+c.balance, 0);
+  const minPay = Math.max(100, Math.round(totalBal * 0.02));
+  const lMin  = document.getElementById('minPayLabel');
+  const lHalf = document.getElementById('halfPayLabel');
+  const lFull = document.getElementById('fullPayLabel');
+  if (lMin)  lMin.textContent  = 'NT$ ' + minPay.toLocaleString();
+  if (lHalf) lHalf.textContent = 'NT$ ' + Math.round(totalBal/2).toLocaleString();
+  if (lFull) lFull.textContent = 'NT$ ' + totalBal.toLocaleString();
+}
+
 function syncFromSlider() {
   const val=+document.getElementById('simSlider').value;
   document.getElementById('simInput').value=val; updateSim();
@@ -1200,6 +1235,7 @@ function syncFromInput() {
 }
 function updateSim() {
   const totalBal=cards.reduce((s,c)=>s+c.balance,0);
+  updatePayLabels();
   const pay=+document.getElementById('simInput').value||0;
   const minPay=Math.max(100,Math.round(totalBal*0.02));
   let activeBtn;

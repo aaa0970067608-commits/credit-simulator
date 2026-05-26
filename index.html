@@ -518,6 +518,93 @@
     <div id="simResult" style="margin-top:12px;background:#13131a;border-radius:12px;padding:14px;font-size:12px;line-height:1.8;display:none;"></div>
   </div>
 
+  <!-- 個人信貸試算 -->
+  <div class="card" id="loanCard">
+    <div class="card-title"><span>🏦</span> 個人信貸試算</div>
+
+    <!-- 評分對應利率建議 -->
+    <div id="loanRateSuggestion" style="background:rgba(124,111,255,0.08);border:1px solid rgba(124,111,255,0.2);border-radius:12px;padding:14px;margin-bottom:16px;font-size:12px;line-height:1.8;">
+      <div style="color:#7c6fff;font-weight:600;margin-bottom:6px;">💡 根據你的信用評分，參考利率範圍：</div>
+      <div id="loanRateText" style="color:#e8e8f0;">請先填寫上方五項資料取得評分</div>
+      <div style="color:#6b6b85;font-size:10px;margin-top:6px;">參考來源：AlphaLoan 信貸統計｜實際利率依各銀行審核為準，通常高於廣告最低利率</div>
+    </div>
+
+    <!-- 輸入區 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div>
+        <label>借款金額（NT$）</label>
+        <input type="number" id="loanAmount" value="300000" min="10000" step="10000" oninput="updateLoan()" style="margin-top:4px;">
+      </div>
+      <div>
+        <label>月薪（NT$）<span style="color:#6b6b85;font-size:10px;">選填</span></label>
+        <input type="number" id="monthlySalary" placeholder="例：40000" min="0" step="1000" oninput="updateLoan()" style="margin-top:4px;">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div>
+        <label>還款期數</label>
+        <select id="loanTerm" onchange="updateLoan()" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;margin-top:4px;">
+          <option value="12">12個月（1年）</option>
+          <option value="24">24個月（2年）</option>
+          <option value="36" selected>36個月（3年）</option>
+          <option value="48">48個月（4年）</option>
+          <option value="60">60個月（5年）</option>
+          <option value="84">84個月（7年）</option>
+        </select>
+      </div>
+      <div>
+        <label>年利率（%）</label>
+        <input type="number" id="loanRate" value="8" min="2" max="15" step="0.5" oninput="updateLoan()" style="margin-top:4px;">
+      </div>
+    </div>
+
+    <div style="font-size:10px;color:#6b6b85;margin-bottom:16px;">
+      月利率 ≈ <span id="loanMonthRate" style="color:#ffd166;font-weight:600;">0.67%</span>　年利率法定上限 15%
+    </div>
+
+    <!-- 月薪結果 -->
+    <div id="salaryResult" style="font-size:11px;color:#6b6b85;margin-bottom:12px;line-height:1.8;"></div>
+
+    <!-- 試算結果 -->
+    <div id="loanResult" style="background:#13131a;border-radius:14px;padding:18px;display:none;">
+      <!-- 每月還款大標 -->
+      <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:14px;margin-bottom:10px;">
+        <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">每月還款（本金＋利息）</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:40px;color:#7c6fff;letter-spacing:2px;" id="loanMonthly">—</div>
+        <div style="font-size:11px;color:#6b6b85;">NT$</div>
+        <div style="font-size:11px;color:#6b6b85;margin-top:6px;">
+          本金 <span id="loanMonthPrincipal" style="color:#e8e8f0;font-weight:600;">—</span> ＋ 利息 <span id="loanMonthInterest" style="color:#ff4757;font-weight:600;">—</span>（第1個月）
+        </div>
+      </div>
+      <!-- 四格 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
+          <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">總還款金額</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#e8e8f0;letter-spacing:1px;" id="loanTotal">—</div>
+          <div style="font-size:11px;color:#6b6b85;">NT$</div>
+        </div>
+        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
+          <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">總利息</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;" id="loanInterest">—</div>
+          <div style="font-size:11px;color:#6b6b85;">NT$</div>
+        </div>
+        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
+          <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">年利率</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#ffd166;letter-spacing:1px;" id="loanRateDisplay">—</div>
+          <div style="font-size:11px;color:#6b6b85;">%</div>
+        </div>
+        <div style="text-align:center;background:#1a1a24;border-radius:10px;padding:12px;">
+          <div style="font-size:11px;color:#6b6b85;margin-bottom:4px;">還款期數</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#00d4a0;letter-spacing:1px;" id="loanTermDisplay">—</div>
+          <div style="font-size:11px;color:#6b6b85;">個月</div>
+        </div>
+      </div>
+      <!-- DTI警示 -->
+      <div id="dtiResult" style="margin-top:12px;font-size:12px;line-height:1.8;display:none;"></div>
+    </div>
+  </div>
+
   <!-- 個人化建議 -->
   <div class="card">
     <div class="card-title"><span>💬</span> 個人化改善建議</div>
@@ -884,12 +971,15 @@ function updateSim() {
       <span style="opacity:0.5;font-size:10px;">※ 30天後通報信用局才正式影響，實際扣分因人而異（myFICO：75–100分）</span>
     `;
     updateTips(newScore);
+    updateLoanRateSuggestion(newScore);
     return;
   }
 
   // 有還款時恢復正常評分顯示
   updateScore();
   updateTips();
+  const displayedScore = +document.getElementById('scoreNum').textContent;
+  if (!isNaN(displayedScore)) updateLoanRateSuggestion(displayedScore);
 
   const isMultiCard = cards.length > 1;
   const grid = document.getElementById('methodGrid');
@@ -1023,7 +1113,97 @@ function updateSim() {
   res.innerHTML = `<span style="color:${phText[activeBtn]}">${behaviors[activeBtn]}</span>`;
 }
 
-// ==================== 建議 ====================
+// ==================== 個人信貸試算 ====================
+const loanRateByScore = [
+  { min: 780, label: '頂尖', rate: { min: 5, max: 8 } },
+  { min: 740, label: '優秀', rate: { min: 5, max: 8 } },
+  { min: 670, label: '良好', rate: { min: 8, max: 10 } },
+  { min: 580, label: '尚可', rate: { min: 10, max: 13 } },
+  { min: 450, label: '需改善', rate: { min: 13, max: 15 } },
+  { min: 300, label: '高度風險', rate: null }
+];
+
+function updateLoanRateSuggestion(score) {
+  const el = document.getElementById('loanRateText');
+  const match = loanRateByScore.find(r => score >= r.min);
+  if (!match) return;
+  if (!match.rate) {
+    el.innerHTML = `<span style="color:#ff4757">評分 ${score} 分（${match.label}）→ 申請可能被拒，建議先改善信用狀況</span>`;
+    document.getElementById('loanRate').value = 15;
+  } else {
+    el.innerHTML = `評分 <strong style="color:#7c6fff">${score}</strong> 分（${match.label}）→ 參考利率約 <strong style="color:#ffd166">${match.rate.min}%–${match.rate.max}%</strong>`;
+    // 自動帶入中間值
+    const mid = ((match.rate.min + match.rate.max) / 2).toFixed(1);
+    document.getElementById('loanRate').value = mid;
+    document.getElementById('loanMonthRate').textContent = (mid / 12).toFixed(2) + '%';
+  }
+  updateLoan();
+}
+
+function updateLoan() {
+  const amount = +document.getElementById('loanAmount').value || 0;
+  const term = +document.getElementById('loanTerm').value || 36;
+  const annualRate = +document.getElementById('loanRate').value || 8;
+  const monthRate = annualRate / 1200;
+  const salary = +document.getElementById('monthlySalary').value || 0;
+
+  document.getElementById('loanMonthRate').textContent = (annualRate / 12).toFixed(2) + '%';
+
+  if (amount <= 0) {
+    document.getElementById('loanResult').style.display = 'none';
+    return;
+  }
+
+  // 等額本息公式
+  let monthly;
+  if (monthRate === 0) {
+    monthly = amount / term;
+  } else {
+    monthly = amount * monthRate * Math.pow(1 + monthRate, term) / (Math.pow(1 + monthRate, term) - 1);
+  }
+  const totalPay = monthly * term;
+  const totalInterest = totalPay - amount;
+
+  document.getElementById('loanResult').style.display = 'block';
+  document.getElementById('loanMonthly').textContent = Math.round(monthly).toLocaleString();
+
+  // 第1個月本金利息拆分
+  const firstInterest = amount * monthRate;
+  const firstPrincipal = monthly - firstInterest;
+  document.getElementById('loanMonthPrincipal').textContent = 'NT$' + Math.round(firstPrincipal).toLocaleString();
+  document.getElementById('loanMonthInterest').textContent = 'NT$' + Math.round(firstInterest).toLocaleString();
+
+  document.getElementById('loanInterest').textContent = Math.round(totalInterest).toLocaleString();
+  document.getElementById('loanInterest').style.color = totalInterest > 0 ? '#ff4757' : '#00d4a0';
+  document.getElementById('loanTotal').textContent = Math.round(totalPay).toLocaleString();
+  document.getElementById('loanRateDisplay').textContent = annualRate;
+  document.getElementById('loanTermDisplay').textContent = term;
+
+  // 月薪22倍上限 + DTI
+  const dtiEl = document.getElementById('dtiResult');
+  const salaryRes = document.getElementById('salaryResult');
+  if (salary > 0) {
+    const maxLoan = salary * 22;
+    const dti = (monthly / salary * 100).toFixed(1);
+    const dtiColor = dti > 40 ? '#ff4757' : dti > 30 ? '#ffd166' : '#00d4a0';
+
+    salaryRes.innerHTML = `
+      最高可借：<strong style="color:#00d4a0">NT$${maxLoan.toLocaleString()}</strong><br>
+      ${amount > maxLoan ? `<span style="color:#ff4757">⚠️ 超過月薪22倍上限</span>` : `<span style="color:#00d4a0">✅ 在可借範圍內</span>`}
+    `;
+
+    dtiEl.style.display = 'block';
+    dtiEl.innerHTML = `
+      負債收入比（DTI）：每月還款 NT$${Math.round(monthly).toLocaleString()} ÷ 月薪 NT$${salary.toLocaleString()} = <strong style="color:${dtiColor}">${dti}%</strong>
+      ${dti > 40 ? '<br><span style="color:#ff4757">⚠️ DTI 超過40%，銀行核貸機率較低，建議減少借款金額或延長期數</span>' : dti > 30 ? '<br><span style="color:#ffd166">注意：DTI 偏高，還款壓力較大</span>' : '<br><span style="color:#00d4a0">✅ DTI 健康，還款壓力合理</span>'}
+    `;
+  } else {
+    salaryRes.innerHTML = '';
+    dtiEl.style.display = 'none';
+  }
+}
+
+
 function updateTips(overrideScore) {
   const { total: baseTotal, util } = calcScore();
   const total = overrideScore !== undefined ? overrideScore : baseTotal;
@@ -1081,6 +1261,10 @@ function updateAll() {
   updateBreakdown();
   updateScore();
   updateTips();
+  // 連動貸款利率建議 — 用畫面上顯示的分數
+  const displayedScore = +document.getElementById('scoreNum').textContent;
+  if (!isNaN(displayedScore)) updateLoanRateSuggestion(displayedScore);
+
 
   const totalBal = cards.reduce((s,c) => s + c.balance, 0);
   const simCard = document.getElementById('simCard');
@@ -1098,6 +1282,7 @@ renderCards();
 selectLate(0);
 selectAge(5);
 selectInquiry(0);
+updateLoan();
 
 
 
